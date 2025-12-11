@@ -106,6 +106,7 @@ def delete_form():
     """)
 @app.route("/delete", methods=["POST"])
 def delete_buy_form():
+    global portfolio
     symbol = request.form["symbol"]
 
     # Perform your delete logic here
@@ -118,7 +119,6 @@ def delete_buy_form():
     current_price = quote["price"]
     net_gain = (current_price - buy_row.buy_price) * buy_row.shares
 
-    global portfolio
     portfolio = portfolio.filter(col("symbol") != symbol)
 
     return render_template_string(f"""
