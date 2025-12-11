@@ -43,7 +43,9 @@ services:
     container_name: finnhub-client
     environment:
       - FINNHUB_API_KEY=${FINNHUB_API_KEY}
-    command: ["${STOCK_SYMBOL:-NVDA}"]
+      - STOCK_SYMBOL=${STOCK_SYMBOL:-NVDA}
+    ports:
+      - "8001:8001"
     networks:
       - stock_api
     restart: unless-stopped
