@@ -1,89 +1,31 @@
-
-<script>
-
-    let currentName = "";
-
-    function updateSharedDisplay() {
-        document.getElementById("sharedValue").innerText = currentName || "null";
-    }
-
-    async function createName() {
-        const value = document.getElementById("createInput").value;
-        const res = await fetch("http://localhost:4000/create", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({ name: value })
-        });
-
-        const text = await res.text();
-        currentName = value;
-        updateSharedDisplay();
-        document.getElementById("createResult").innerText = text;
-    }
-
-    async function readName() {
-        const res = await fetch("http://localhost:4001/read");
-        const text = await res.text();
-
-        updateSharedDisplay();
-        document.getElementById("readResult").innerText = text;
-    }
-
-    async function updateName() {
-        const value = document.getElementById("updateInput").value;
-        const res = await fetch("http://localhost:4002/update", {
-            method: "PUT",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({ name: value })
-        });
-
-        const text = await res.text();
-        currentName = value;
-        updateSharedDisplay();
-        document.getElementById("updateResult").innerText = text;
-    }
-
-    async function deleteName() {
-        const res = await fetch("http://localhost:4003/delete", {
-            method: "DELETE",
-            headers: {"Content-Type": "application/json"},
-        });
-
-        const text = await res.text();
-        currentName = "";
-        updateSharedDisplay();
-        document.getElementById("deleteResult").innerText = text;
-    }
-
-</script>
-
 <!DOCTYPE html>
 <html>
 <head>
     <title>Distributed Systems Final</title>
 </head>
+<body data-backend-url="{{ backend_url }}">
+<h1>Example API Data</h1>
+<pre id="payload">test</pre>
 
-<body>
-    <h2>Name Value</h2>
-    <p id="sharedValue">null</p>
-    <hr>
+<script>
+    const configuredBackend = document.body.dataset.backendUrl;
+    const backendBase = configuredBackend || "http://localhost:4000";
+    const dataUrl = `${backendBase}/data`;
 
-    <h2>Create</h2>
-    <input type="text" id="createInput" placeholder="Create">
-    <button onclick="createName()">Create</button>
-    <p id="createResult"></p>
+    async function loadData() {
+        const output = document.getElementById("payload");
+        if (!output) return;
+        try {
+            const res = await fetch(dataUrl);
+            if (!res.ok) throw new Error((await res.text()));
+            const data = await res.json();
+            output.textContent = JSON.stringify(data, null, 2);
+        } catch (err) {
+            output.textContent = `Error: ${err.message}`;
+        }
+    }
 
-    <h2>Read</h2>
-    <button onclick="readName()">Read</button>
-    <p id="readResult"></p>
-
-    <h2>Update</h2>
-    <input type="text" id="updateInput" placeholder="Update">
-    <button onclick="updateName()">Update</button>
-    <p id="updateResult"></p>
-
-    <h2>Delete</h2>
-    <button onclick="deleteName()">Delete</button>
-    <p id="deleteResult"></p>
+    document.addEventListener("DOMContentLoaded", loadData);
+</script>
 </body>
 </html>

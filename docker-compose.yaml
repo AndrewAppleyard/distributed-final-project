@@ -1,60 +1,40 @@
 services:
-  # spark-master:
-  #   image: apache/spark:3.5.6
-  #   container_name: spark-master
-  #   command: ["/opt/spark/sbin/start-master.sh"]
-  #   environment:
-  #     - SPARK_NO_DAEMONIZE=true
-  #   ports:
-  #     - "7077:7077"
-  #     - "8080:8080"
-  #   networks:
-  #     - sparknet
+  spark-master:
+    image: apache/spark:3.5.6
+    container_name: spark-master
+    command: ["/opt/spark/sbin/start-master.sh"]
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+    ports:
+      - "7077:7077"
+      - "8080:8080"
+    networks:
+      - sparknet
 
-  # spark-worker:
-  #   image: apache/spark:3.5.6
-  #   container_name: spark-worker
-  #   depends_on:
-  #     - spark-master
-  #   command: ["/opt/spark/sbin/start-worker.sh", "spark://spark-master:7077"]
-  #   environment:
-  #     - SPARK_NO_DAEMONIZE=true
-  #   ports:
-  #     - "8081:8081"
-  #   networks:
-  #     - sparknet
-        
+  spark-worker:
+    image: apache/spark:3.5.6
+    container_name: spark-worker
+    depends_on:
+      - spark-master
+    command: ["/opt/spark/sbin/start-worker.sh", "spark://spark-master:7077"]
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+    ports:
+      - "8081:8081"
+    networks:
+      - sparknet
+
+  backend:
+    build: ./backend
+    container_name: backend
+    ports:
+      - "4000:4000"
+
   frontend:
     build: ./frontend
     container_name: frontend
     ports:
       - "8800:8800"
-    environment:
-      - BACKEND_URL=http://backend:4000
-
-  create-api:
-      build: ./create_api
-      container_name: create-api
-      ports:
-        - "4000:4000"
-
-  read-api:
-    build: ./read_api
-    container_name: read-api
-    ports:
-      - "4001:4001"
-
-  update-api:
-    build: ./update_api
-    container_name: update-api
-    ports:
-      - "4002:4002"
-
-  delete-api:
-    build: ./delete_api
-    container_name: delete-api
-    ports:
-      - "4003:4003"
 
 networks:
   sparknet:
