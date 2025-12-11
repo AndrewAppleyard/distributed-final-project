@@ -1,72 +1,134 @@
-
+from flask import Flask, request, jsonify, render_template_string
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, when, lit
-import shutil
-import os
+from pyspark.sql.functions import col, when
+from datetime import datetime
+import requests, time, threading
 
-def atomic_replace(src_dir, dst_dir):
-    # Remove destination if exists, then move src -> dst
-    if os.path.exists(dst_dir):
-        shutil.rmtree(dst_dir)
-    os.rename(src_dir, dst_dir)
+app = Flask(__name__)
 
-def main():
-    spark = SparkSession.builder \
-        .appName("BasicSparkCRUD") \
-        .master("local[*]") \
-        .getOrCreate()
+spark = SparkSession.builder.appName("StockCRUD").getOrCreate()
 
-    spark.sparkContext.setLogLevel("WARN")
+# Add timestamp + buy_value
+portfolio = spark.createDataFrame(
+    [],
+    """
+    symbol STRING,
+    shares INT,
+    buy_price DOUBLE,
+    buy_time TIMESTAMP,
+    buy_value DOUBLE
+    """
+)
 
-    table_path = "parquet-table"
-    tmp_path = "parquet-table_tmp"
+# Background fetcher (optional)
+def fetch_and_store():
+    url = "http://172.17.0.1:8001/quote"
+    while True:
+        try:
+            data = requests.get(url).json()
+            print("Fetched:", data)
+        except Exception as e:
+            print("Error:", e)
+        time.sleep(5)
 
-    # --- CREATE ---
-    print("\n=== CREATE: write initial dataset ===")
-    data = [(1, "Alice", 29), (2, "Bob", 31), (3, "Charlie", 25)]
-    df = spark.createDataFrame(data, ["id", "name", "age"])
-    df.write.mode("overwrite").parquet(table_path)
+threading.Thread(target=fetch_and_store, daemon=True).start()
 
-    # --- READ ---
-    print("\n=== READ: load the table ===")
-    df_read = spark.read.parquet(table_path)
-    df_read.show()
+# --- CREATE ---
+@app.route("/create", methods=["GET", "POST"])
+def create_buy():
+    global portfolio
+    if request.method == "POST":
+        symbol = request.form["symbol"].upper()
+        shares = int(request.form["shares"])
+        buy_price = float(request.form["buy_price"])
 
-    # --- UPDATE ---
-    print("\n=== UPDATE: change age for Alice to 30 ===")
-    df_updated = df_read.withColumn(
-        "age", when(col("name") == "Alice", lit(30)).otherwise(col("age"))
+        buy_time = datetime.utcnow()
+        buy_value = shares * buy_price
+
+        new_row = [(symbol, shares, buy_price, buy_time, buy_value)]
+        new_df = spark.createDataFrame(new_row, portfolio.schema)
+
+        portfolio = portfolio.union(new_df)
+
+        return render_template_string("""
+            <h2>Buy Created!</h2>
+            <p>Symbol: {{symbol}}</p>
+            <p>Shares: {{shares}}</p>
+            <p>Buy Price: {{buy_price}}</p>
+            <p>Timestamp: {{buy_time}}</p>
+            <a href="/create">Back to form</a>
+        """, symbol=symbol, shares=shares, buy_price=buy_price, buy_time=buy_time)
+
+    return render_template_string("""
+        <h2>Create a Buy</h2>
+        <form method="post">
+            Symbol: <input type="text" name="symbol"><br>
+            Shares: <input type="number" name="shares"><br>
+            Buy Price: <input type="text" name="buy_price"><br>
+            <input type="submit" value="Submit">
+        </form>
+    """)
+
+@app.route("/")
+def index():
+    return "Backend is running! Try /read or /create"
+
+# --- READ ---
+@app.route("/read", methods=["GET"])
+def read_portfolio():
+    return jsonify([row.asDict() for row in portfolio.collect()])
+
+# --- UPDATE ---
+@app.route("/update", methods=["PUT"])
+def update_buy():
+    global portfolio
+    payload = request.json
+
+    portfolio = portfolio.withColumn(
+        "buy_price",
+        when(col("symbol") == payload["symbol"], payload["new_price"]).otherwise(col("buy_price"))
     )
-    # write to temp, then swap
-    df_updated.write.mode("overwrite").parquet(tmp_path)
-    atomic_replace(tmp_path, table_path)
 
-    # Clear Spark’s metadata caches to be extra safe
-    spark.catalog.clearCache()
-    spark.conf.set("spark.sql.parquet.cacheMetadata", "false")
+    return jsonify({
+        "status": "buy updated",
+        "portfolio": [row.asDict() for row in portfolio.collect()]
+    })
 
-    # --- DELETE ---
-    print("\n=== DELETE: remove Bob ===")
-    df_after_update = spark.read.parquet(table_path)
-    df_after_delete = df_after_update.filter(col("name") != "Bob")
-    df_after_delete.write.mode("overwrite").parquet(tmp_path)
-    atomic_replace(tmp_path, table_path)
+# --- DELETE (SELL) ---
+@app.route("/delete", methods=["GET"])
+def delete_form():
+    return render_template_string("""
+        <h2>Sell/Delete a Stock</h2>
+        <form method="post" action="/delete">
+            Symbol: <input type="text" name="symbol"><br>
+            <input type="submit" value="Delete">
+        </form>
+    """)
+@app.route("/delete", methods=["POST"])
+def delete_buy_form():
+    symbol = request.form["symbol"]
 
-    # --- APPEND ---
-    print("\n=== APPEND: add David ===")
-    df_new = spark.createDataFrame([(4, "David", 40)], ["id", "name", "age"])
-    df_new.write.mode("append").parquet(table_path)
+    # Perform your delete logic here
+    rows = portfolio.filter(col("symbol") == symbol).collect()
+    if not rows:
+        return f"<h3>Symbol {symbol} not found</h3>"
 
-    # --- READ AGAIN ---
-    print("\n=== READ AGAIN: verify changes ===")
-    final_df = spark.read.parquet(table_path)
-    final_df.orderBy("id").show()
+    buy_row = rows[0]
+    quote = requests.get(f"http://172.17.0.1:8001/quote?symbol={symbol}").json()
+    current_price = quote["price"]
+    net_gain = (current_price - buy_row.buy_price) * buy_row.shares
 
-    print("\n=== SUMMARY ===")
-    print(f"Row count: {final_df.count()}")
-    final_df.groupBy().agg({"age": "avg"}).show()
+    global portfolio
+    portfolio = portfolio.filter(col("symbol") != symbol)
 
-    spark.stop()
-
+    return render_template_string(f"""
+        <h2>Stock Sold</h2>
+        <p>Symbol: {symbol}</p>
+        <p>Shares: {buy_row.shares}</p>
+        <p>Buy Price: {buy_row.buy_price}</p>
+        <p>Current Price: {current_price}</p>
+        <p><b>Net Gain: {net_gain}</b></p>
+        <a href="/delete">Back</a>
+    """)
 if __name__ == "__main__":
-    main()
+    app.run(host="0.0.0.0", port=4000)
