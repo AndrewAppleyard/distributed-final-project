@@ -6,7 +6,12 @@ import requests, time, threading
 
 app = Flask(__name__)
 
-spark = SparkSession.builder.appName("StockCRUD").getOrCreate()
+spark = (
+    SparkSession.builder
+    .appName("StockCRUD")
+    .master("spark://spark-master:7077")
+    .getOrCreate()
+)
 
 # Add timestamp + buy_value
 portfolio = spark.createDataFrame(
@@ -22,7 +27,7 @@ portfolio = spark.createDataFrame(
 
 # Background fetcher (optional)
 def fetch_and_store():
-    url = "http://172.17.0.1:8001/quote"
+    url = "finnhub-client:8001/quote"
     while True:
         try:
             data = requests.get(url).json()

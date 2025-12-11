@@ -32,10 +32,11 @@ services:
       - INFLUXDB_URL=${INFLUXDB_URL:-http://influxdb:8086}
       - INFLUXDB_TOKEN=${INFLUXDB_ADMIN_TOKEN:-local-token}
       - INFLUXDB_ORG=${INFLUXDB_ORG:-trading}
-      - INFLUXDB_BUCKET=${INFLUXDB_BUCKET:-user_data}
+      - INFLUXDB_BUCKET=${INFLUXDB_BUCKET:-market_data}
     ports:
       - "4000:4000"
     networks:
+      - sparknet
       - stock_api
 
   frontend:
@@ -68,7 +69,7 @@ services:
       - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUXDB_USERNAME:-admin}
       - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUXDB_PASSWORD:-password}
       - DOCKER_INFLUXDB_INIT_ORG=${INFLUXDB_ORG:-trading}
-      - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUXDB_BUCKET:-user_data}
+      - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUXDB_BUCKET:-market_data}
       - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUXDB_ADMIN_TOKEN:-local-token}
     volumes:
       - influxdb_data:/var/lib/influxdb2
