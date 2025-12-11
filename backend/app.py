@@ -1,139 +1,139 @@
-from flask import Flask, request, jsonify, render_template_string
+import os
+from datetime import datetime
+from typing import Optional
+
+import requests
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field, validator
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, when
-from datetime import datetime
-import requests, time, threading
+from pyspark.sql.types import (
+    StructField,
+    StructType,
+    StringType,
+    IntegerType,
+    DoubleType,
+    TimestampType,
+)
 
-app = Flask(__name__)
+SPARK_MASTER_URL = os.environ.get("SPARK_MASTER_URL", "spark://spark-master:7077")
+API_URL = os.environ.get("API_URL", "http://finnhub-client:8001/quote")
 
 spark = (
-    SparkSession.builder
-    .appName("StockCRUD")
-    .master("spark://spark-master:7077")
-    .getOrCreate()
+    SparkSession.builder.appName("StockCRUD").master(SPARK_MASTER_URL).getOrCreate()
 )
 
-# Add timestamp + buy_value
-portfolio = spark.createDataFrame(
-    [],
-    """
-    symbol STRING,
-    shares INT,
-    buy_price DOUBLE,
-    buy_time TIMESTAMP,
-    buy_value DOUBLE
-    """
+portfolio_schema = StructType(
+    [
+        StructField("symbol", StringType(), True),
+        StructField("shares", IntegerType(), True),
+        StructField("buy_price", DoubleType(), True),
+        StructField("buy_time", TimestampType(), True),
+        StructField("buy_value", DoubleType(), True),
+    ]
 )
+portfolio = spark.createDataFrame([], schema=portfolio_schema)
 
-# Background fetcher (optional)
-def fetch_and_store():
-    url = "finnhub-client:8001/quote"
-    while True:
-        try:
-            data = requests.get(url).json()
-            print("Fetched:", data)
-        except Exception as e:
-            print("Error:", e)
-        time.sleep(5)
+app = FastAPI(title="Backend", version="0.2.0")
 
-threading.Thread(target=fetch_and_store, daemon=True).start()
 
-# --- CREATE ---
-@app.route("/create", methods=["GET", "POST"])
-def create_buy():
-    global portfolio
-    if request.method == "POST":
-        symbol = request.form["symbol"].upper()
-        shares = int(request.form["shares"])
-        buy_price = float(request.form["buy_price"])
+class TradeCreate(BaseModel):
+    symbol: str = Field(..., min_length=1)
+    shares: int = Field(..., gt=0)
+    buy_price: float = Field(..., gt=0)
 
-        buy_time = datetime.utcnow()
-        buy_value = shares * buy_price
+    @validator("symbol")
+    def upper_symbol(cls, v):
+        return v.upper()
 
-        new_row = [(symbol, shares, buy_price, buy_time, buy_value)]
-        new_df = spark.createDataFrame(new_row, portfolio.schema)
 
-        portfolio = portfolio.union(new_df)
+class TradeUpdate(BaseModel):
+    new_price: float = Field(..., gt=0)
 
-        return render_template_string("""
-            <h2>Buy Created!</h2>
-            <p>Symbol: {{symbol}}</p>
-            <p>Shares: {{shares}}</p>
-            <p>Buy Price: {{buy_price}}</p>
-            <p>Timestamp: {{buy_time}}</p>
-            <a href="/create">Back to form</a>
-        """, symbol=symbol, shares=shares, buy_price=buy_price, buy_time=buy_time)
 
-    return render_template_string("""
-        <h2>Create a Buy</h2>
-        <form method="post">
-            Symbol: <input type="text" name="symbol"><br>
-            Shares: <input type="number" name="shares"><br>
-            Buy Price: <input type="text" name="buy_price"><br>
-            <input type="submit" value="Submit">
-        </form>
-    """)
+def fetch_quote(symbol: str) -> Optional[float]:
+    url = API_URL.rstrip("/")
+    target = f"{url}/{symbol.upper()}" if symbol else url
+    try:
+        resp = requests.get(target, timeout=10)
+        resp.raise_for_status()
+        data = resp.json()
+        return data.get("current") or data.get("price")
+    except Exception:
+        return None
 
-@app.route("/")
-def index():
-    return "Backend is running! Try /read or /create"
 
-# --- READ ---
-@app.route("/read", methods=["GET"])
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+
+@app.get("/")
+def root():
+    return {"message": "Backend is running. Use /portfolio or /trades endpoints."}
+
+
+@app.get("/portfolio")
 def read_portfolio():
-    return jsonify([row.asDict() for row in portfolio.collect()])
+    return [row.asDict() for row in portfolio.collect()]
 
-# --- UPDATE ---
-@app.route("/update", methods=["PUT"])
-def update_buy():
+
+@app.post("/trades")
+def create_trade(trade: TradeCreate):
     global portfolio
-    payload = request.json
+    buy_time = datetime.utcnow()
+    buy_value = trade.shares * trade.buy_price
+    new_row = [(trade.symbol, trade.shares, trade.buy_price, buy_time, buy_value)]
+    new_df = spark.createDataFrame(new_row, portfolio.schema)
+    portfolio = portfolio.union(new_df)
+    return {"status": "created", "trade": trade.dict(), "timestamp": buy_time}
+
+
+@app.put("/trades/{symbol}")
+def update_trade(symbol: str, payload: TradeUpdate):
+    global portfolio
+    symbol = symbol.upper()
+    if portfolio.filter(col("symbol") == symbol).count() == 0:
+        raise HTTPException(status_code=404, detail="Symbol not found")
 
     portfolio = portfolio.withColumn(
         "buy_price",
-        when(col("symbol") == payload["symbol"], payload["new_price"]).otherwise(col("buy_price"))
+        when(col("symbol") == symbol, payload.new_price).otherwise(col("buy_price")),
+    ).withColumn(
+        "buy_value",
+        when(col("symbol") == symbol, col("shares") * payload.new_price).otherwise(
+            col("buy_value")
+        ),
     )
 
-    return jsonify({
-        "status": "buy updated",
-        "portfolio": [row.asDict() for row in portfolio.collect()]
-    })
+    return {
+        "status": "updated",
+        "symbol": symbol,
+        "portfolio": [row.asDict() for row in portfolio.collect()],
+    }
 
-# --- DELETE (SELL) ---
-@app.route("/delete", methods=["GET"])
-def delete_form():
-    return render_template_string("""
-        <h2>Sell/Delete a Stock</h2>
-        <form method="post" action="/delete">
-            Symbol: <input type="text" name="symbol"><br>
-            <input type="submit" value="Delete">
-        </form>
-    """)
-@app.route("/delete", methods=["POST"])
-def delete_buy_form():
+
+@app.delete("/trades/{symbol}")
+def delete_trade(symbol: str):
     global portfolio
-    symbol = request.form["symbol"]
-
-    # Perform your delete logic here
+    symbol = symbol.upper()
     rows = portfolio.filter(col("symbol") == symbol).collect()
     if not rows:
-        return f"<h3>Symbol {symbol} not found</h3>"
+        raise HTTPException(status_code=404, detail="Symbol not found")
 
     buy_row = rows[0]
-    quote = requests.get(f"http://172.17.0.1:8001/quote?symbol={symbol}").json()
-    current_price = quote["price"]
-    net_gain = (current_price - buy_row.buy_price) * buy_row.shares
+    current_price = fetch_quote(symbol)
+    net_gain = None
+    if current_price is not None:
+        net_gain = (current_price - buy_row.buy_price) * buy_row.shares
 
     portfolio = portfolio.filter(col("symbol") != symbol)
 
-    return render_template_string(f"""
-        <h2>Stock Sold</h2>
-        <p>Symbol: {symbol}</p>
-        <p>Shares: {buy_row.shares}</p>
-        <p>Buy Price: {buy_row.buy_price}</p>
-        <p>Current Price: {current_price}</p>
-        <p><b>Net Gain: {net_gain}</b></p>
-        <a href="/delete">Back</a>
-    """)
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=4000)
+    return {
+        "status": "deleted",
+        "symbol": symbol,
+        "shares": buy_row.shares,
+        "buy_price": buy_row.buy_price,
+        "current_price": current_price,
+        "net_gain": net_gain,
+    }
