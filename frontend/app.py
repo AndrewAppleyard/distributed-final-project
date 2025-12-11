@@ -2,7 +2,7 @@ import os
 from flask import Flask, render_template
 
 app = Flask(__name__)
-BACKEND_URL = os.environ.get("BACKEND_URL", "http://localhost:4000")
+BACKEND_URL = os.environ.get("BACKEND_URL")
 
 @app.route("/")
 def home():

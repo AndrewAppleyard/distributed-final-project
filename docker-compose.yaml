@@ -33,6 +33,8 @@ services:
   frontend:
     build: ./frontend
     container_name: frontend
+    environment:
+      - BACKEND_URL=${BACKEND_URL:-}
     ports:
       - "8800:8800"
 

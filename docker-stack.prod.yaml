@@ -61,11 +61,25 @@ services:
     ports:
       - "8800:8800"
     environment:
-      - BACKEND_URL=http://backend:4000
+      - BACKEND_URL=${BACKEND_URL:-}
     networks:
       - sparknet
     deploy:
       replicas: 2
+      restart_policy:
+        condition: on-failure
+
+  finnhub-client:
+    image: distributed-finnhub:latest
+    ports:
+      - "8001:8001"
+    environment:
+      - FINNHUB_API_KEY=${FINNHUB_API_KEY}
+      - STOCK_SYMBOL=${STOCK_SYMBOL:-NVDA}
+    networks:
+      - sparknet
+    deploy:
+      replicas: 1
       restart_policy:
         condition: on-failure
 
