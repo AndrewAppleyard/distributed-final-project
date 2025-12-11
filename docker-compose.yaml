@@ -36,5 +36,18 @@ services:
     ports:
       - "8800:8800"
 
+  finnhub-client:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: finnhub-client
+    environment:
+      - FINNHUB_API_KEY=${FINNHUB_API_KEY}
+    command: ["${STOCK_SYMBOL:-NVDA}"]
+    networks:
+      - stock_api
+    restart: unless-stopped
+
 networks:
   sparknet:
+  stock_api:
