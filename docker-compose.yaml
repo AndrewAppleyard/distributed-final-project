@@ -49,7 +49,7 @@ services:
     networks:
       - stock_api
     volumes:
-      - ./frontend:/app
+      - ./frontend:/app:Z
 
   finnhub-client:
     build:
