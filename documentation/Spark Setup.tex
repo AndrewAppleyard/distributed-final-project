@@ -76,7 +76,7 @@
     \item Init swarm: \texttt{sudo docker swarm init --advertise-addr <your-ip>}
     \item Check status: \texttt{sudo docker info | grep -A3 "Swarm"}
     \item List nodes: \texttt{sudo docker node ls}
-    \item Deploy stack: \texttt{sudo docker stack deploy -c docker-stack.prod.yaml distributed}
+    \item Deploy stack: \texttt{sudo ./scripts/deploy\_prod.sh}
     \item List services: \texttt{sudo docker stack services distributed}
     \item Same as above: \texttt{sudo docker service ls}
     \item Inspect service: \texttt{sudo docker service ps <service\_name>} and logs: \texttt{sudo docker service logs -f <service\_name>}
