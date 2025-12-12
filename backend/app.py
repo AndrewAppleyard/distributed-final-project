@@ -2,7 +2,7 @@ import os
 import threading
 import time
 from datetime import datetime
-from typing import Optional, List, Dict, Optional as Opt, Set
+from typing import Optional, List, Dict, Optional as Opt, Dict, Set
 
 import base64
 import requests
@@ -69,6 +69,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 price_cache: Dict[str, Optional[float]] = {}
 symbol_set: Set[str] = set()
 cache_lock = threading.Lock()
@@ -164,6 +165,18 @@ def health():
 @app.get("/")
 def root():
     return {"message": "Backend is running. Use /portfolio or /trades endpoints."}
+
+
+@app.get("/favicon.ico")
+@app.get("/static/favicon.png")
+def backend_favicon():
+    return Response(content=FAVICON_PNG, media_type="image/png")
+
+
+@app.get("/balance")
+def read_balance():
+    with balance_lock:
+        return {"balance": balance_amount}
 
 
 def write_portfolio_to_influx():
@@ -267,11 +280,6 @@ def pull_prices():
 
         time.sleep(max(5, PRICE_POLL_INTERVAL))
 
-
-@app.get("/balance")
-def read_balance():
-    with balance_lock:
-        return {"balance": balance_amount}
 
 @app.get("/portfolio")
 def read_portfolio():
@@ -385,6 +393,10 @@ def update_trade(symbol: str, payload: TradeUpdate):
 
     # Writes to database
     write_portfolio_to_influx()
+    with cache_lock:
+        price_cache.pop(symbol, None)
+        symbol_set.add(symbol)
+
     return {
         "status": "updated",
         "symbol": symbol,
@@ -439,6 +451,10 @@ def delete_trade(symbol: str, payload: Optional[TradeSell] = None):
         "net_gain": net_gain,
         "balance": current_balance if sale_price is not None else balance_amount,
     }
+
+
+# start background price cache refresher
+threading.Thread(target=update_price_cache, daemon=True).start()
 
 
 # Starts pulling the api

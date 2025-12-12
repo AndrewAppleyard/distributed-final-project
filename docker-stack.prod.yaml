@@ -6,6 +6,8 @@ services:
     command: ["/opt/spark/sbin/start-master.sh"]
     environment:
       - SPARK_NO_DAEMONIZE=true
+      - PYSPARK_PYTHON=python3
+      - PYSPARK_DRIVER_PYTHON=python3
     ports:
       - "7077:7077"
       - "8080:8080"
@@ -125,6 +127,7 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
     deploy:
       replicas: 1
       restart_policy:

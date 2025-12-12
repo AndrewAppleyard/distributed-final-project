@@ -47,3 +47,9 @@ a {
         padding: 1.5rem;
     }
 }
+
+html, body {
+  min-height: 100%;
+  height: auto;
+  overflow-y: auto;
+}

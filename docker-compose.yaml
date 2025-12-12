@@ -59,8 +59,10 @@ services:
       - INFLUXDB_URL=${INFLUXDB_URL:-http://influxdb:8086}
       - INFLUXDB_TOKEN=${INFLUXDB_TOKEN:-local-token}
       - INFLUXDB_ORG=${INFLUXDB_ORG:-trading}
-      - INFLUXDB_BUCKET=${INFLUXDB_BUCKET:-market_data}
-      - SPARK_MASTER_URL=spark://spark-master:7077
+      - INFLUXDB_BUCKET=${INFLUXDB_BUCKET:-user_data}
+      - SPARK_MASTER_URL=local[*]
+      - PYSPARK_PYTHON=python3
+      - PYSPARK_DRIVER_PYTHON=python3
     ports:
       - "4000:4000"
       - "35000:35000"
@@ -132,6 +134,7 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:Z
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:Z
     restart: unless-stopped
 
 networks:
