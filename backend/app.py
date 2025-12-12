@@ -4,10 +4,12 @@ import time
 from datetime import datetime
 from typing import Optional, Dict, Set
 
+import base64
 import requests
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, validator
+from fastapi.responses import Response
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, when
 from pyspark.sql.types import (
@@ -55,6 +57,7 @@ symbol_set: Set[str] = set()
 cache_lock = threading.Lock()
 balance_lock = threading.Lock()
 balance_amount: float = START_BALANCE
+FAVICON_PNG = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAADElEQVR42mP8/58BAwAI/AL+fS5mAAAAAElFTkSuQmCC")
 
 
 class TradeCreate(BaseModel):
@@ -133,6 +136,12 @@ def health():
 @app.get("/")
 def root():
     return {"message": "Backend is running. Use /portfolio or /trades endpoints."}
+
+
+@app.get("/favicon.ico")
+@app.get("/static/favicon.png")
+def backend_favicon():
+    return Response(content=FAVICON_PNG, media_type="image/png")
 
 
 @app.get("/balance")
