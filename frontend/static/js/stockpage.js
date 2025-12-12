@@ -4,6 +4,37 @@ const formatDateTime = (epochSeconds) => new Date(epochSeconds * 1000).toLocaleS
 let currentQuotePrice = 0;
 let currentBalance = null;
 let currentShares = 0;
+let loaderInterval = null;
+
+function startLoader() {
+    const overlay = document.getElementById("loader-overlay");
+    const spans = Array.from(document.querySelectorAll("#loader-circle span"));
+    spans.forEach((s) => (s.style.opacity = "0"));
+    if (overlay) overlay.classList.remove("hidden");
+    let mode = "show";
+    let idx = 0;
+    if (loaderInterval) clearInterval(loaderInterval);
+    loaderInterval = setInterval(() => {
+        if (!spans.length) return;
+        spans[idx].style.opacity = mode === "show" ? "1" : "0";
+        idx += 1;
+        if (idx >= spans.length) {
+            idx = 0;
+            mode = mode === "show" ? "hide" : "show";
+        }
+    }, 250);
+}
+
+function stopLoader() {
+    if (loaderInterval) {
+        clearInterval(loaderInterval);
+        loaderInterval = null;
+    }
+    const overlay = document.getElementById("loader-overlay");
+    const spans = document.querySelectorAll("#loader-circle span");
+    spans.forEach((s) => (s.style.opacity = "0"));
+    if (overlay) overlay.classList.add("hidden");
+}
 
 function resolveBackendBase() {
     const host = window.location.hostname;
@@ -175,6 +206,11 @@ function wireBuyModal() {
             const backendBase = resolveBackendBase();
             const sharesVal = Number(sharesInput.value) || 0;
             if (!sharesVal || !currentQuotePrice) return;
+            const totalCost = sharesVal * currentQuotePrice;
+            if (currentBalance !== null && totalCost > currentBalance) {
+                showAlert("Insufficient balance for this buy", "red");
+                return;
+            }
             const payload = {
                 symbol,
                 shares: sharesVal,
@@ -284,6 +320,7 @@ function wireUpdateModal() {
     const valueEl = document.getElementById("update-value");
     const balanceEl = document.getElementById("update-balance");
     const page = document.getElementById("stock-page");
+    const loader = document.getElementById("loader-overlay");
     let dragging = false;
 
     const positionFollow = () => {
@@ -391,6 +428,7 @@ function wireUpdateModal() {
                 current_price: currentQuotePrice,
             };
             try {
+                startLoader();
                 const res = await fetch(`${backendBase}/trades/${encodeURIComponent(symbol)}`, {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
@@ -414,6 +452,8 @@ function wireUpdateModal() {
                 loadPortfolioStatus();
             } catch (err) {
                 showAlert(err.message || "Update failed", "red");
+            } finally {
+                stopLoader();
             }
         });
     }

@@ -12,9 +12,9 @@
         <div>
             <p class="eyebrow">Cardboard trading bay</p>
             <h1>Welcome to Cardstock</h1>
-            <p class="lede">Navigate your paper trades, metrics, and ideas on a tidy cardboard board that stays clear of the sidebar.</p>
+            <p class="lede">Simulate trading end-to-end: search live quotes, buy/update/sell with balance-aware modals, track holdings in the portfolio carousel + grid, and watch quotes refresh on the stock page.</p>
             <div class="cta-row">
-                <a class="cta primary" href="/">Dashboard</a>
+                <a class="cta primary" href="/search">Search stocks</a>
                 <a class="cta ghost" href="/portfolio">Portfolio</a>
             </div>
         </div>
@@ -34,35 +34,36 @@
 
     <section class="quick-links">
         <div class="link-card">
-            <div class="icon">📦</div>
+            <div class="icon"><i class="bi bi-briefcase"></i></div>
             <h3>Portfolio</h3>
-            <p>See holdings, cash, and movers in one glance.</p>
+            <p>Live holdings with quote-refreshing cards, balance, and a “show all” grid.</p>
             <a href="/portfolio">Open</a>
         </div>
         <div class="link-card">
-            <div class="icon">📈</div>
+            <div class="icon"><i class="bi bi-bar-chart"></i></div>
             <h3>Metrics</h3>
-            <p>Follow returns, win rate, and equity drift.</p>
+            <p>View return, win rate, and equity drift in a cardboard-styled dashboard.</p>
             <a href="/metrics">Open</a>
         </div>
         <div class="link-card">
-            <div class="icon">🔍</div>
+            <div class="icon"><i class="bi bi-box2"></i></div>
             <h3>Search</h3>
-            <p>Scout tickers and pin cardboard notes.</p>
+            <p>Lookup quotes, filter by ticker, and jump into stock detail pages.</p>
             <a href="/search">Open</a>
         </div>
     </section>
 
     <section class="callout card">
         <div>
-            <p class="eyebrow">Why cardboard?</p>
-            <h2>Playful, legible, and organized</h2>
-            <p class="body-copy">The layout keeps content offset from the sidebar while embracing the LittleBigPlanet-inspired palette. Spark + Flask power the practice trades, with room for metrics and search without crowding the view.</p>
-        </div>
-        <div class="tags">
-            <span class="tag">Spark backend</span>
-            <span class="tag">Influx metrics</span>
-            <span class="tag">Flask frontend</span>
+            <p class="eyebrow">Quick guide</p>
+            <h2>How to use Cardstock</h2>
+            <ul class="arch-list">
+                <li><strong>Search:</strong> Start on Search to look up a ticker and click into its stock page.</li>
+                <li><strong>Buy:</strong> On the stock page, open Buy to set shares or amount; balance checks apply.</li>
+                <li><strong>Update:</strong> Use the Update slider to adjust shares with live price impact.</li>
+                <li><strong>Sell:</strong> Use Sell to close a position; proceeds flow back to your balance.</li>
+                <li><strong>Portfolio:</strong> View holdings in the carousel or “Show all” grid; each card links to the stock page.</li>
+            </ul>
         </div>
     </section>
 </div>

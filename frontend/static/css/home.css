@@ -101,11 +101,22 @@
     padding: 1rem;
     color: #3d2e1f;
     box-shadow: 0 4px 0 #8a6d4e;
+    transition: transform 0.1s, box-shadow 0.1s;
 }
 
 .link-card .icon {
-    font-size: 1.4rem;
+    width: 42px;
+    height: 42px;
     margin-bottom: 0.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.link-card .icon .bi {
+    font-size: 1.9rem;
+    color: #4a3521;
+    font-weight: 800;
 }
 
 .link-card a {
@@ -114,6 +125,12 @@
     display: inline-block;
     margin-top: 0.3rem;
 }
+
+.link-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 #8a6d4e;
+}
+
 
 .callout {
     display: flex;
@@ -129,20 +146,14 @@
     max-width: 640px;
 }
 
-.tags {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
+.arch-list {
+    padding-left: 1rem;
+    margin: 0.5rem 0 0;
+    color: #cfd8e3;
 }
 
-.tag {
-    background: #e6cda6;
-    color: #3d2e1f;
-    padding: 0.35rem 0.6rem;
-    border-radius: 10px;
-    border: 2px dashed #8a6d4e;
-    font-weight: bold;
-    box-shadow: 0 3px 0 #8a6d4e;
+.arch-list li + li {
+    margin-top: 0.3rem;
 }
 
 .eyebrow {

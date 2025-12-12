@@ -14,7 +14,9 @@
             <h1>Portfolio</h1>
             <p class="lede">Peek at your cardboard-friendly positions, cash, and ideas before placing your next paper trade.</p>
         </div>
-        <button class="cardboard-btn" id="refresh-portfolio">Refresh board</button>
+        <button class="cardboard-btn icon-only" id="refresh-portfolio" aria-label="Refresh board">
+            <i class="bi bi-arrow-counterclockwise"></i>
+        </button>
     </div>
 
     <div class="stat-grid">
@@ -41,20 +43,23 @@
                 <p class="eyebrow">Positions</p>
                 <h3>Cardstock holdings</h3>
             </div>
-            <span class="tag">Simulated</span>
+            <button class="cardboard-btn ghost small" id="show-all-holdings">Show all</button>
         </div>
-        <div id="positions-list" class="positions-grid"></div>
+        <div class="positions-gallery">
+            <button class="gallery-arrow left" aria-label="Scroll left" id="positions-left">&#9664;</button>
+            <div id="positions-list" class="positions-track"></div>
+            <button class="gallery-arrow right" aria-label="Scroll right" id="positions-right">&#9654;</button>
+        </div>
     </div>
+</div>
 
-    <div class="card board watchlist-card">
-        <div class="board-header">
-            <div>
-                <p class="eyebrow">Watchlist</p>
-                <h3>Pin ideas to the cardboard</h3>
-            </div>
-            <span class="tag soft">Curated</span>
+<div id="holdings-modal" class="modal hidden">
+    <div class="modal-content wide">
+        <div class="modal-header">
+            <h3>All holdings</h3>
+            <button class="close-btn" id="holdings-close" aria-label="Close">✕</button>
         </div>
-        <div id="watchlist" class="watchlist-grid"></div>
+        <div id="holdings-grid" class="holdings-grid"></div>
     </div>
 </div>
 {% endblock %}
