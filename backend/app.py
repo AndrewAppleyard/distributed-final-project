@@ -268,6 +268,11 @@ def pull_prices():
         time.sleep(max(5, PRICE_POLL_INTERVAL))
 
 
+@app.get("/balance")
+def read_balance():
+    with balance_lock:
+        return {"balance": balance_amount}
+
 @app.get("/portfolio")
 def read_portfolio():
     return [row.asDict() for row in portfolio.collect()]
