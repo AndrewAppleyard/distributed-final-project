@@ -2,7 +2,7 @@ import os
 import threading
 import time
 from datetime import datetime
-from typing import Optional, List, Dict, Optional as Opt
+from typing import Optional, List, Dict, Optional as Opt, Set
 
 import base64
 import requests
@@ -36,6 +36,7 @@ PRICE_POLL_INTERVAL = int(os.environ.get("PRICE_POLL_INTERVAL", "5"))
 latest_prices: List[Dict] = []
 last_price_write_error: Opt[str] = None
 last_price_write_time: Opt[datetime] = None
+START_BALANCE = float(os.environ.get("START_BALANCE", 3000))
 
 spark = (
     SparkSession.builder

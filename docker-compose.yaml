@@ -52,13 +52,15 @@ services:
   backend:
     build: ./backend
     container_name: backend
+    depends_on:
+      - spark-master
     environment:
       - API_URL=${API_URL:-http://finnhub-client:8001/quote}
       - INFLUXDB_URL=${INFLUXDB_URL:-http://influxdb:8086}
       - INFLUXDB_TOKEN=${INFLUXDB_TOKEN:-local-token}
       - INFLUXDB_ORG=${INFLUXDB_ORG:-trading}
       - INFLUXDB_BUCKET=${INFLUXDB_BUCKET:-market_data}
-      - SPARK_MASTER_URL=local[*]
+      - SPARK_MASTER_URL=spark://spark-master:7077
     ports:
       - "4000:4000"
       - "35000:35000"
@@ -118,7 +120,7 @@ services:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
       - INFLUXDB_ORG=${INFLUXDB_ORG:-trading}
-      - INFLUXDB_BUCKET=${INFLUXDB_BUCKET:-user_data}
+      - INFLUXDB_BUCKET=${INFLUXDB_BUCKET:-market_data}
       - INFLUXDB_TOKEN=${INFLUXDB_TOKEN:-local-token}
       - GF_SECURITY_ALLOW_EMBEDDING=true
       - GF_AUTH_ANONYMOUS_ENABLED=true
