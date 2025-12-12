@@ -2,14 +2,16 @@ import os
 import threading
 import time
 from datetime import datetime
-from typing import Optional, List, Dict, Optional as Opt
+from typing import Optional, List, Dict, Optional as Opt, Dict, Set
 
+import base64
 import requests
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
 from pydantic import BaseModel, Field, validator
+from fastapi.responses import Response
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, when
 from pyspark.sql.types import (
@@ -34,15 +36,20 @@ PRICE_POLL_INTERVAL = int(os.environ.get("PRICE_POLL_INTERVAL", "5"))
 latest_prices: List[Dict] = []
 last_price_write_error: Opt[str] = None
 last_price_write_time: Opt[datetime] = None
+START_BALANCE = float(os.environ.get("START_BALANCE", 3000))
 
 spark = (
-    SparkSession.builder.appName("StockCRUD").master(SPARK_MASTER_URL).getOrCreate()
+    SparkSession.builder.appName("StockCRUD")
+    .master(SPARK_MASTER_URL)
+    .config("spark.driver.bindAddress", "0.0.0.0")
+    .config("spark.driver.host", "backend")
+    .getOrCreate()
 )
 
 portfolio_schema = StructType(
     [
         StructField("symbol", StringType(), True),
-        StructField("shares", IntegerType(), True),
+        StructField("shares", DoubleType(), True),
         StructField("buy_price", DoubleType(), True),
         StructField("buy_time", TimestampType(), True),
         StructField("buy_value", DoubleType(), True),
@@ -59,6 +66,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+price_cache: Dict[str, Optional[float]] = {}
+symbol_set: Set[str] = set()
+cache_lock = threading.Lock()
+balance_lock = threading.Lock()
+balance_amount: float = START_BALANCE
+FAVICON_PNG = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAADElEQVR42mP8/58BAwAI/AL+fS5mAAAAAElFTkSuQmCC")
+
 influx_client = None
 write_api = None
 if INFLUX_TOKEN:
@@ -73,7 +87,7 @@ if INFLUX_TOKEN:
 
 class TradeCreate(BaseModel):
     symbol: str = Field(..., min_length=1)
-    shares: int = Field(..., gt=0)
+    shares: float = Field(..., gt=0)
     buy_price: float = Field(..., gt=0)
 
     @validator("symbol")
@@ -82,19 +96,61 @@ class TradeCreate(BaseModel):
 
 
 class TradeUpdate(BaseModel):
-    new_price: float = Field(..., gt=0)
+    new_price: Optional[float] = Field(None, gt=0)
+    delta_shares: Optional[float] = None
+    current_price: Optional[float] = Field(None, gt=0)
+
+
+class TradeSell(BaseModel):
+    sale_price: float = Field(..., gt=0)
 
 
 def fetch_quote(symbol: str) -> Optional[float]:
+    payload = fetch_quote_payload(symbol)
+    if not payload:
+        return None
+    return payload.get("current") or payload.get("price")
+
+
+def fetch_quote_payload(symbol: str) -> Optional[Dict]:
     url = API_URL.rstrip("/")
     target = f"{url}/{symbol.upper()}" if symbol else url
     try:
         resp = requests.get(target, timeout=10)
         resp.raise_for_status()
         data = resp.json()
-        return data.get("current") or data.get("price")
+        data["symbol"] = data.get("symbol") or symbol.upper()
+        if "current" not in data and "price" in data:
+            data["current"] = data["price"]
+        return data
     except Exception:
         return None
+
+
+def get_cached_price(symbol: str) -> Optional[float]:
+    with cache_lock:
+        return price_cache.get(symbol.upper())
+
+
+def update_price_cache():
+    """Background loop to refresh prices for current portfolio symbols without Spark jobs."""
+    while True:
+        try:
+            with cache_lock:
+                symbols = list(symbol_set)
+            for sym in symbols:
+                latest = fetch_quote(sym)
+                with cache_lock:
+                    price_cache[sym.upper()] = latest
+            # prune cache entries for symbols no longer in portfolio
+            with cache_lock:
+                existing = set(price_cache.keys())
+                keep = {s.upper() for s in symbols}
+                for stale in existing - keep:
+                    price_cache.pop(stale, None)
+        except Exception:
+            pass
+        time.sleep(5)
 
 
 @app.get("/health")
@@ -105,6 +161,18 @@ def health():
 @app.get("/")
 def root():
     return {"message": "Backend is running. Use /portfolio or /trades endpoints."}
+
+
+@app.get("/favicon.ico")
+@app.get("/static/favicon.png")
+def backend_favicon():
+    return Response(content=FAVICON_PNG, media_type="image/png")
+
+
+@app.get("/balance")
+def read_balance():
+    with balance_lock:
+        return {"balance": balance_amount}
 
 
 def write_portfolio_to_influx():
@@ -214,25 +282,105 @@ def read_portfolio():
     return [row.asDict() for row in portfolio.collect()]
 
 
+@app.get("/cache")
+def read_cache():
+    with cache_lock:
+        return dict(price_cache)
+
+
+@app.get("/quote/{symbol}")
+def read_quote(symbol: str):
+    payload = fetch_quote_payload(symbol)
+    if payload is None:
+        raise HTTPException(status_code=502, detail="Quote lookup failed")
+    return payload
+
+
 @app.post("/trades")
 def create_trade(trade: TradeCreate):
-    global portfolio
+    global portfolio, balance_amount
     buy_time = datetime.utcnow()
     buy_value = trade.shares * trade.buy_price
+    with balance_lock:
+        if balance_amount < buy_value:
+            raise HTTPException(status_code=400, detail="Insufficient balance")
+        balance_amount -= buy_value
+
     new_row = [(trade.symbol, trade.shares, trade.buy_price, buy_time, buy_value)]
     new_df = spark.createDataFrame(new_row, portfolio.schema)
     portfolio = portfolio.union(new_df)
     # Writes to database
     write_portfolio_to_influx()
-    return {"status": "created", "trade": trade.dict(), "timestamp": buy_time}
+    with cache_lock:
+        price_cache.pop(trade.symbol, None)
+        symbol_set.add(trade.symbol)
+    with balance_lock:
+        current_balance = balance_amount
+    return {"status": "created", "trade": trade.dict(), "timestamp": buy_time, "balance": current_balance}
 
 
 @app.put("/trades/{symbol}")
 def update_trade(symbol: str, payload: TradeUpdate):
-    global portfolio
+    global portfolio, balance_amount
     symbol = symbol.upper()
     if portfolio.filter(col("symbol") == symbol).count() == 0:
         raise HTTPException(status_code=404, detail="Symbol not found")
+
+    rows = portfolio.filter(col("symbol") == symbol).collect()
+    buy_row = rows[0]
+
+    # Handle share delta adjustments if provided
+    if payload.delta_shares is not None:
+        if payload.current_price is None or payload.current_price <= 0:
+            raise HTTPException(status_code=400, detail="current_price required for share update")
+        delta = payload.delta_shares
+        new_shares = buy_row.shares + delta
+        if new_shares < 0:
+            raise HTTPException(status_code=400, detail="Resulting shares cannot be negative")
+        trade_value = delta * payload.current_price  # positive = buy (deduct), negative = sell (add)
+        with balance_lock:
+            if trade_value > 0 and balance_amount < trade_value:
+                raise HTTPException(status_code=400, detail="Insufficient balance")
+            balance_amount -= trade_value
+            current_balance = balance_amount
+
+        if new_shares == 0:
+            portfolio = portfolio.filter(col("symbol") != symbol)
+            with cache_lock:
+                price_cache.pop(symbol, None)
+                symbol_set.discard(symbol)
+            return {
+                "status": "updated",
+                "symbol": symbol,
+                "shares": 0,
+                "portfolio": [row.asDict() for row in portfolio.collect()],
+                "balance": current_balance,
+            }
+
+        new_buy_value = buy_row.buy_value + trade_value
+        new_buy_price = new_buy_value / new_shares if new_shares else buy_row.buy_price
+
+        portfolio = portfolio.withColumn(
+            "shares", when(col("symbol") == symbol, new_shares).otherwise(col("shares"))
+        ).withColumn(
+            "buy_price",
+            when(col("symbol") == symbol, new_buy_price).otherwise(col("buy_price")),
+        ).withColumn(
+            "buy_value",
+            when(col("symbol") == symbol, new_buy_value).otherwise(col("buy_value")),
+        )
+
+        return {
+            "status": "updated",
+            "symbol": symbol,
+            "shares": new_shares,
+            "balance": current_balance,
+            "portfolio": [row.asDict() for row in portfolio.collect()],
+        }
+
+    # Fallback to price-only update
+    if payload.new_price is None:
+        raise HTTPException(status_code=400, detail="No update parameters provided")
 
     portfolio = portfolio.withColumn(
         "buy_price",
@@ -246,28 +394,52 @@ def update_trade(symbol: str, payload: TradeUpdate):
 
     # Writes to database
     write_portfolio_to_influx()
+    with cache_lock:
+        price_cache.pop(symbol, None)
+        symbol_set.add(symbol)
+
     return {
         "status": "updated",
         "symbol": symbol,
+        "shares": buy_row.shares,
         "portfolio": [row.asDict() for row in portfolio.collect()],
     }
 
 
 @app.delete("/trades/{symbol}")
-def delete_trade(symbol: str):
-    global portfolio
+def delete_trade(symbol: str, payload: Optional[TradeSell] = None):
+    global portfolio, balance_amount
     symbol = symbol.upper()
     rows = portfolio.filter(col("symbol") == symbol).collect()
     if not rows:
         raise HTTPException(status_code=404, detail="Symbol not found")
 
     buy_row = rows[0]
-    current_price = fetch_quote(symbol)
     net_gain = None
-    if current_price is not None:
-        net_gain = (current_price - buy_row.buy_price) * buy_row.shares
+    sale_price = None
 
+    # prefer explicit sale_price from payload if provided
+    if payload and payload.sale_price:
+        sale_price = payload.sale_price
+    else:
+        with cache_lock:
+            cached = price_cache.get(symbol.upper())
+        if cached is not None:
+            sale_price = cached
+
+    if sale_price is not None:
+        net_gain = (sale_price - buy_row.buy_price) * buy_row.shares
+        proceeds = sale_price * buy_row.shares
+        with balance_lock:
+            balance_amount += proceeds
+        current_balance = balance_amount
+
+
+    # Remove the trade without blocking on quote lookups.
     portfolio = portfolio.filter(col("symbol") != symbol)
+    with cache_lock:
+        price_cache.pop(symbol, None)
+        symbol_set.discard(symbol)
 
     # Writes to database
     write_portfolio_to_influx()
@@ -276,9 +448,14 @@ def delete_trade(symbol: str):
         "symbol": symbol,
         "shares": buy_row.shares,
         "buy_price": buy_row.buy_price,
-        "current_price": current_price,
+        "sale_price": sale_price,
         "net_gain": net_gain,
+        "balance": current_balance if sale_price is not None else balance_amount,
     }
+
+
+# start background price cache refresher
+threading.Thread(target=update_price_cache, daemon=True).start()
 
 
 # Starts pulling the api

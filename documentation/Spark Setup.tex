@@ -1,0 +1,102 @@
+\documentclass[10pt,titlepage]{article}
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{amsmath,amsfonts,amsthm}
+\usepackage{spverbatim}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{pgfplots}
+\usepackage[letterpaper, margin=1.25in]{geometry}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usetikzlibrary{trees}
+\usepackage{hyperref}
+\usepackage{enumitem}
+
+\lstdefinestyle{mystyle}{
+  keywordstyle=\color{blue},
+  commentstyle=\color{red},
+  stringstyle=\color{violet},
+  basicstyle=\fontsize{12}{12},
+  columns=fullflexible,
+  breaklines=true
+}
+
+\titleformat{\section}
+  {\normalfont\Large\bfseries}{\thesection}{1em}{}[{\titlerule[0.8pt]}]
+
+\lstset{style=mystyle}
+
+\title{Final Project Report}
+\author{Abraham Sharum, Isaac Tunchez, Andrew Appleyard\\ Class: CS 30003 - Distributed Systems}
+
+\begin{document}
+\pagestyle{fancy}
+\fancyhead{}
+\fancyhead[LE,LO]{\textbf{CCS 30003 -- Distributed Systems}}
+\fancyhead[RO,RE]{\textbf{Spark Anayltics Setup}}
+\fancyfoot{}
+\fancyfoot[CE,CO]{\textbf{\thepage}}
+\maketitle
+
+\section*{Demonstration Guide}
+
+\subsection*{Installation Steps}
+\begin{enumerate}[leftmargin=*]
+  \item Install Docker and Docker Compose.
+  \item Clone the repository.
+  \item Create a root \texttt{.env} with at least:
+  \begin{itemize}[leftmargin=*]
+    \item \texttt{FINNHUB\_API\_KEY=\$YOUR\_KEY}
+    \item \texttt{INFLUXDB\_USERNAME}, \texttt{INFLUXDB\_PASSWORD} (8--72 chars), \texttt{INFLUXDB\_ADMIN\_TOKEN}
+  \end{itemize}
+  \item Ensure ports 4000, 8001, 8800, 3000, 8086, 7077, 8080 are free.
+\end{enumerate}
+
+\subsection*{Run the Containers (Exact Commands)}
+\begin{itemize}[leftmargin=*]
+  \item Build and start: \texttt{docker compose up --build}
+  \item Stop: \texttt{docker compose down}
+  \item Rebuild a single service (example backend): \texttt{docker compose build backend}
+\end{itemize}
+
+\subsection*{Run the CRUD Application}
+\begin{itemize}[leftmargin=*]
+  \item Backend FastAPI: \texttt{http://localhost:4000} (Swagger UI at \texttt{/docs}).
+  \item Frontend dashboard: \texttt{http://localhost:8800}.
+  \item Key endpoints:
+  \begin{itemize}[leftmargin=*]
+    \item \texttt{GET /portfolio} --- list all trades.
+    \item \texttt{POST /trades} --- create (e.g., \texttt{\{"symbol":"AAPL","shares":5,"buy\_price":180\}}).
+    \item \texttt{PUT /trades/\{symbol\}} --- update buy price (e.g., \texttt{\{"new\_price":185\}}).
+    \item \texttt{DELETE /trades/\{symbol\}} --- delete/sell a trade.
+  \end{itemize}
+  \item Finnhub quote API: \texttt{http://localhost:8001/quote/\{symbol\}} (uses \texttt{FINNHUB\_API\_KEY}).
+  \item Grafana (optional dashboards): \texttt{http://localhost:3000}.
+\end{itemize}
+
+\subsection*{Reproduce the Custom Example}
+\begin{enumerate}[leftmargin=*]
+  \item Start services: \texttt{docker compose up --build}.
+  \item Create a trade:
+\begin{verbatim}
+curl -X POST http://localhost:4000/trades \
+  -H "Content-Type: application/json" \
+  -d '{"symbol":"AAPL","shares":5,"buy_price":180}'
+\end{verbatim}
+  \item Update it:
+\begin{verbatim}
+curl -X PUT http://localhost:4000/trades/AAPL \
+  -H "Content-Type: application/json" \
+  -d '{"new_price":185}'
+\end{verbatim}
+  \item Delete it:
+\begin{verbatim}
+curl -X DELETE http://localhost:4000/trades/AAPL
+\end{verbatim}
+  \item Verify via \texttt{GET /portfolio} or refresh the frontend dashboard.
+\end{enumerate}
+
+\end{document}

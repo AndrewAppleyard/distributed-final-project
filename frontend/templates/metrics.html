@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Metrics | Cardstock{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/metrics.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="metrics-page">
+    <div class="page-header">
+        <div>
+            <p class="eyebrow">Account Pulse</p>
+            <h1>Metrics</h1>
+            <p class="lede">Gauge how your paper trades are trending with quick stats, simple visuals, and a cozy cardboard vibe.</p>
+        </div>
+        <button class="cardboard-btn" id="refresh-metrics">Refresh metrics</button>
+    </div>
+
+    <div class="card stat-row">
+        <div class="stat-block">
+            <p class="label">Return (YTD)</p>
+            <h2 id="metric-return">--</h2>
+            <p class="muted" id="metric-return-note">Pending update.</p>
+        </div>
+        <div class="stat-block">
+            <p class="label">Win rate</p>
+            <h2 id="metric-winrate">--</h2>
+            <p class="muted">Closed trades finishing green.</p>
+        </div>
+        <div class="stat-block">
+            <p class="label">Avg holding</p>
+            <h2 id="metric-hold">--</h2>
+            <p class="muted">Time in position.</p>
+        </div>
+    </div>
+
+    <div class="card performance-card">
+        <div class="board-header">
+            <div>
+                <p class="eyebrow">Balance Curve</p>
+                <h3>Equity drift</h3>
+            </div>
+            <span class="tag">Scribbled</span>
+        </div>
+        <div id="performance-bars" class="spark-grid"></div>
+    </div>
+
+    <div class="metrics-grid">
+        <div class="card">
+            <h3>Risk + stability</h3>
+            <div id="risk-list" class="pill-list"></div>
+        </div>
+        <div class="card">
+            <h3>Highlights</h3>
+            <ul id="metric-list" class="bullet-list"></ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/metrics.js') }}"></script>
+{% endblock %}

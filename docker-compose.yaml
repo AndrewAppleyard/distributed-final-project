@@ -5,6 +5,8 @@ services:
     command: ["/opt/spark/sbin/start-master.sh"]
     environment:
       - SPARK_NO_DAEMONIZE=true
+      - PYSPARK_PYTHON=python3
+      - PYSPARK_DRIVER_PYTHON=python3
     ports:
       - "7077:7077"
       - "8080:8080"
@@ -19,8 +21,29 @@ services:
     command: ["/opt/spark/sbin/start-worker.sh", "spark://spark-master:7077"]
     environment:
       - SPARK_NO_DAEMONIZE=true
+      - PYSPARK_PYTHON=python3
+      - PYSPARK_DRIVER_PYTHON=python3
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=2g
     ports:
       - "8081:8081"
+    networks:
+      - sparknet
+
+  spark-worker-2:
+    image: apache/spark:3.5.6
+    container_name: spark-worker-2
+    depends_on:
+      - spark-master
+    command: ["/opt/spark/sbin/start-worker.sh", "spark://spark-master:7077"]
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+      - PYSPARK_PYTHON=python3
+      - PYSPARK_DRIVER_PYTHON=python3
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=2g
+    ports:
+      - "8082:8082"
     networks:
       - sparknet
 
@@ -34,6 +57,8 @@ services:
       - INFLUXDB_ORG=${INFLUXDB_ORG:-trading}
       - INFLUXDB_BUCKET=${INFLUXDB_BUCKET:-user_data}
       - SPARK_MASTER_URL=local[*]
+      - PYSPARK_PYTHON=python3
+      - PYSPARK_DRIVER_PYTHON=python3
     ports:
       - "4000:4000"
     networks:
@@ -44,7 +69,7 @@ services:
     build: ./frontend
     container_name: frontend
     environment:
-      - BACKEND_URL=${BACKEND_URL:-http://localhost:4000}
+      - BACKEND_URL=${BACKEND_URL:-}
     ports:
       - "8800:8800"
     networks:

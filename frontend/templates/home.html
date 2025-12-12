@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Cardstock Home{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="home-wrapper">
+    <section class="welcome card">
+        <div>
+            <p class="eyebrow">Cardboard trading bay</p>
+            <h1>Welcome to Cardstock</h1>
+            <p class="lede">Simulate trading end-to-end: search live quotes, buy/update/sell with balance-aware modals, track holdings in the portfolio carousel + grid, and watch quotes refresh on the stock page.</p>
+            <div class="cta-row">
+                <a class="cta primary" href="/search">Search stocks</a>
+                <a class="cta ghost" href="/portfolio">Portfolio</a>
+            </div>
+        </div>
+        <div class="stats">
+            <div class="stat-chip">
+                <p class="label">Equity (sim)</p>
+                <h3>$125,400</h3>
+                <p class="note">+1.2% today</p>
+            </div>
+            <div class="stat-chip">
+                <p class="label">Win rate</p>
+                <h3>64%</h3>
+                <p class="note">Across closed trades</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="quick-links">
+        <div class="link-card">
+            <div class="icon"><i class="bi bi-briefcase"></i></div>
+            <h3>Portfolio</h3>
+            <p>Live holdings with quote-refreshing cards, balance, and a “show all” grid.</p>
+            <a href="/portfolio">Open</a>
+        </div>
+        <div class="link-card">
+            <div class="icon"><i class="bi bi-bar-chart"></i></div>
+            <h3>Metrics</h3>
+            <p>View return, win rate, and equity drift in a cardboard-styled dashboard.</p>
+            <a href="/metrics">Open</a>
+        </div>
+        <div class="link-card">
+            <div class="icon"><i class="bi bi-box2"></i></div>
+            <h3>Search</h3>
+            <p>Lookup quotes, filter by ticker, and jump into stock detail pages.</p>
+            <a href="/search">Open</a>
+        </div>
+    </section>
+
+    <section class="callout card">
+        <div>
+            <p class="eyebrow">Quick guide</p>
+            <h2>How to use Cardstock</h2>
+            <ul class="arch-list">
+                <li><strong>Search:</strong> Start on Search to look up a ticker and click into its stock page.</li>
+                <li><strong>Buy:</strong> On the stock page, open Buy to set shares or amount; balance checks apply.</li>
+                <li><strong>Update:</strong> Use the Update slider to adjust shares with live price impact.</li>
+                <li><strong>Sell:</strong> Use Sell to close a position; proceeds flow back to your balance.</li>
+                <li><strong>Portfolio:</strong> View holdings in the carousel or “Show all” grid; each card links to the stock page.</li>
+            </ul>
+        </div>
+    </section>
+</div>
+{% endblock %}

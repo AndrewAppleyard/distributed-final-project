@@ -1,0 +1,326 @@
+/* Portfolio page styles */
+.portfolio-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    color: #f2f2f2;
+}
+
+.portfolio-page .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.portfolio-page .lede {
+    color: #cfd8e3;
+    max-width: 720px;
+}
+
+.portfolio-page .cardboard-btn {
+    background: #f0d9b8;
+    border: 2px dashed #8a6d4e;
+    color: #4a3521;
+    padding: 0.8rem 1.2rem;
+    border-radius: 10px;
+    font-weight: bold;
+    box-shadow: 0 4px 0 #8a6d4e;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.portfolio-page .cardboard-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 #8a6d4e;
+}
+
+.portfolio-page .cardboard-btn.icon-only {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 50%;
+    background: #e2c7a3;
+    border: 2px dashed #8a6d4e;
+    color: #4a3521;
+    box-shadow: 0 4px 0 #8a6d4e;
+}
+
+.portfolio-page .cardboard-btn.icon-only .bi {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #4a3521;
+    text-shadow: 0 0 1px #4a3521, 0 0 2px #4a3521;
+}
+
+.portfolio-page .cardboard-btn.small {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+}
+
+.portfolio-page .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 0.75rem;
+    color: #f2e3cf;
+}
+
+.portfolio-page .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.portfolio-page .stat-card {
+    background: #243447;
+    border: 2px solid #111;
+}
+
+.portfolio-page .stat-card .label {
+    color: #b3c2d3;
+    margin-bottom: 0.3rem;
+}
+
+.portfolio-page .stat-card h2 {
+    margin: 0.2rem 0;
+    font-size: 1.8rem;
+}
+
+.portfolio-page .muted {
+    color: #9aabc1;
+    font-size: 0.95rem;
+}
+
+.portfolio-page .board {
+    background: #2c3d52;
+    border: 2px solid #111;
+}
+
+.portfolio-page .board-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.portfolio-page .tag {
+    background: #d4b48c;
+    border: 2px dashed #8a6d4e;
+    color: #4a3521;
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+.portfolio-page .tag.soft {
+    opacity: 0.8;
+}
+
+.portfolio-page .positions-gallery {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+}
+
+.portfolio-page .positions-track {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: calc((100% - 3 * 0.8rem) / 4);
+    gap: 0.8rem;
+    overflow: hidden;
+    scroll-behavior: smooth;
+}
+
+.portfolio-page .holding-card {
+    background: #d4b48c;
+    border: 2px dashed #8a6d4e;
+    border-radius: 10px;
+    padding: 0.75rem;
+    color: #3d2e1f;
+    box-shadow: 0 4px 0 #8a6d4e;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    min-width: 150px;
+}
+
+.portfolio-page .holding-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 #8a6d4e;
+}
+
+.portfolio-page .holding-card .top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.portfolio-page .holding-card .symbol {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #2c1f14;
+}
+
+.portfolio-page .holding-card .price {
+    font-weight: bold;
+    color: #2c1f14;
+}
+
+.portfolio-page .holding-card .meta {
+    color: #5e452b;
+    font-size: 0.9rem;
+}
+
+.portfolio-page .holding-card .value {
+    font-weight: bold;
+}
+
+.portfolio-page .holding-card .badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    border: 1px solid #b2916b;
+    font-size: 0.85rem;
+}
+
+.portfolio-page .holding-card .badge.up {
+    background: #d9f3dd;
+    color: #1baf5d;
+}
+
+.portfolio-page .holding-card .badge.down {
+    background: #fbe0de;
+    color: #c0392b;
+}
+
+.holdings-grid {
+    display: grid;
+    gap: 0.6rem;
+}
+
+.modal-content.wide {
+    width: min(900px, 95vw);
+}
+
+.portfolio-page .gallery-arrow {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px dashed rgba(212, 180, 140, 0.3);
+    color: #fff;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    opacity: 0.4;
+    transition: transform 0.1s, opacity 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.portfolio-page .gallery-arrow:hover {
+    opacity: 1;
+    transform: scale(1.1);
+    border-color: #d4b48c;
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+}
+
+.modal-content {
+    background: #2c3d52;
+    border: 2px solid #111;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    width: min(900px, 95vw);
+    max-height: 80vh;
+    overflow: auto;
+    color: #f2f2f2;
+}
+
+.modal-content.wide {
+    width: min(1000px, 95vw);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.modal-header h3 {
+    margin: 0;
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.2rem;
+    color: #f2f2f2;
+    cursor: pointer;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.holdings-grid {
+    display: grid;
+    gap: 0.6rem;
+    padding: 0.4rem;
+}
+
+.holdings-grid .holding-card {
+    background: #d4b48c;
+    border: 2px dashed #8a6d4e;
+    border-radius: 10px;
+    padding: 0.75rem;
+    color: #3d2e1f;
+    box-shadow: 0 4px 0 #8a6d4e;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.holdings-grid .holding-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 #8a6d4e;
+}
+}
+
+.portfolio-page .watchlist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.8rem;
+}
+
+.portfolio-page .watch-card {
+    background: #e6cda6;
+    border: 2px dashed #8a6d4e;
+    border-radius: 10px;
+    padding: 0.9rem;
+    color: #3d2e1f;
+    box-shadow: 0 3px 0 #8a6d4e;
+}
+
+.portfolio-page .watch-card h4 {
+    margin: 0 0 0.3rem;
+}
+
+.portfolio-page .watch-card .note {
+    font-size: 0.9rem;
+    color: #5e452b;
+}
