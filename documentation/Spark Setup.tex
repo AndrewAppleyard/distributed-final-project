@@ -29,7 +29,7 @@
 
 \lstset{style=mystyle}
 
-\title{Final Project Report}
+\title{Spark Setup Documentation}
 \author{Abraham Sharum, Isaac Tunchez, Andrew Appleyard\\ Class: CS 30003 - Distributed Systems}
 
 \begin{document}
@@ -49,10 +49,14 @@
   \item Clone the repository.
   \item Create a root \texttt{.env} with at least:
   \begin{itemize}[leftmargin=*]
-    \item \texttt{FINNHUB\_API\_KEY=\$YOUR\_KEY}
-    \item \texttt{INFLUXDB\_USERNAME}, \texttt{INFLUXDB\_PASSWORD} (8--72 chars), \texttt{INFLUXDB\_ADMIN\_TOKEN}
+    \item \texttt{FINNHUB\_API\_KEY=}
+    \item \texttt{INFLUXDB\_TOKEN=}
+    \item \texttt{INFLUXDB\_USERNAME=}
+    \item \texttt{INFLUXDB\_PASSWORD=}
+    \item \texttt{INFLUXDB\_ORG=}
+    \item \texttt{INFLUXDB\_BUCKET=}
   \end{itemize}
-  \item Ensure ports 4000, 8001, 8800, 3000, 8086, 7077, 8080 are free.
+  \item Ensure ports 4000, 7077, 8001, 8080, 8081, 8082, 8086, 8800 are free.
 \end{enumerate}
 
 \subsection*{Run the Containers (Exact Commands)}
@@ -60,6 +64,7 @@
   \item Build and start: \texttt{docker compose up --build}
   \item Stop: \texttt{docker compose down}
   \item Rebuild a single service (example backend): \texttt{docker compose build backend}
+  \item Spark services: master + two workers come up via compose; workers are limited to \texttt{SPARK\_WORKER\_CORES=2} and \texttt{SPARK\_WORKER\_MEMORY=2g}.
 \end{itemize}
 
 \subsection*{Run the CRUD Application}
@@ -71,7 +76,8 @@
     \item \texttt{GET /portfolio} --- list all trades.
     \item \texttt{POST /trades} --- create (e.g., \texttt{\{"symbol":"AAPL","shares":5,"buy\_price":180\}}).
     \item \texttt{PUT /trades/\{symbol\}} --- update buy price (e.g., \texttt{\{"new\_price":185\}}).
-    \item \texttt{DELETE /trades/\{symbol\}} --- delete/sell a trade.
+    \item \texttt{DELETE /trades/\{symbol\}} --- delete/sell a trade; optional body \texttt{\{"sale\_price":190\}} to compute net gain.
+    \item \texttt{GET /cache} --- view in-memory price cache (refreshed every 5s for tracked symbols).
   \end{itemize}
   \item Finnhub quote API: \texttt{http://localhost:8001/quote/\{symbol\}} (uses \texttt{FINNHUB\_API\_KEY}).
   \item Grafana (optional dashboards): \texttt{http://localhost:3000}.

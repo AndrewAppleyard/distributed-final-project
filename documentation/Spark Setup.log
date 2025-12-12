@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.12.8)  11 DEC 2025 19:19
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.12.8)  11 DEC 2025 22:38
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -984,28 +984,34 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) [1
 
 {/home/abraham/.miktex/texmfs/data/fonts/map/pdftex/pdftex.map}]
-LaTeX Font Info:    Trying to load font information for TS1+cmtt on input line 
-52.
+Overfull \hbox (31.03094pt too wide) in paragraph at lines 67--68
+[]\OT1/cmr/m/n/10 Spark services: master + two workers come up via compose; wor
+kers are limited to \OT1/cmtt/m/n/10 SPARK[]WORKER[]CORES=2
+ []
 
-(/home/abraham/.miktex/texmfs/install/tex/latex/base/ts1cmtt.fd
-File: ts1cmtt.fd 2023/04/13 v2.5m Standard LaTeX font definitions
-)
 LaTeX Font Info:    Trying to load font information for OMS+cmtt on input line 
-72.
-LaTeX Font Info:    No file OMScmtt.fd. on input line 72.
-
+77.
+LaTeX Font Info:    No file OMScmtt.fd. on input line 77.
 
 LaTeX Font Warning: Font shape `OMS/cmtt/m/n' undefined
 (Font)              using `OMS/cmsy/m/n' instead
-(Font)              for symbol `textbraceleft' on input line 72.
+(Font)              for symbol `textbraceleft' on input line 77.
+
+
+Overfull \hbox (9.11118pt too wide) in paragraph at lines 79--80
+[]\OT1/cmtt/m/n/10 DELETE /trades/\OMS/cmtt/m/n/10 f\OT1/cmtt/m/n/10 symbol\OMS
+/cmtt/m/n/10 g \OT1/cmr/m/n/10 --- delete/sell a trade; optional body \OMS/cmtt
+/m/n/10 f\OT1/cmtt/m/n/10 "sale[]price":190\OMS/cmtt/m/n/10 g \OT1/cmr/m/n/10 t
+o compute
+ []
 
 
 pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has 
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.100 \end{enumerate}
-                      [1] [2] (Spark Setup.aux)
+l.94 \end{verbatim}
+                    [1] [2] (Spark Setup.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-02-20>
@@ -1018,26 +1024,25 @@ Package rerunfilecheck Info: File `"Spark Setup".out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
  ) 
 Here is how much of TeX's memory you used:
- 34042 strings out of 476385
- 779526 string characters out of 5794170
+ 34025 strings out of 476385
+ 778982 string characters out of 5794170
  1938187 words of memory out of 5000000
- 55569 multiletter control sequences out of 15000+600000
- 565033 words of font info for 62 fonts, out of 8000000 for 9000
+ 55556 multiletter control sequences out of 15000+600000
+ 564736 words of font info for 61 fonts, out of 8000000 for 9000
  0 hyphenation exceptions out of 8191
- 99i,11n,101p,760b,611s stack positions out of 10000i,1000n,20000p,200000b,200000s
- </home/abraham/.miktex/texmfs/data/fonts/pk/ljfour/jknappen/ec/dpi600/tctt10
-00.pk> </home/abraham/.miktex/texmfs/data/fonts/pk/ljfour/jknappen/ec/dpi600/tc
-rm1000.pk></home/abraham/.miktex/texmfs/install/fonts/type1/public/amsfonts/cm/
-cmbx10.pfb></home/abraham/.miktex/texmfs/install/fonts/type1/public/amsfonts/cm
-/cmbx12.pfb></home/abraham/.miktex/texmfs/install/fonts/type1/public/amsfonts/c
-m/cmr10.pfb></home/abraham/.miktex/texmfs/install/fonts/type1/public/amsfonts/c
-m/cmr12.pfb></home/abraham/.miktex/texmfs/install/fonts/type1/public/amsfonts/c
-m/cmr17.pfb></home/abraham/.miktex/texmfs/install/fonts/type1/public/amsfonts/c
-m/cmsy10.pfb></home/abraham/.miktex/texmfs/install/fonts/type1/public/amsfonts/
-cm/cmtt10.pfb>
-Output written on "Spark Setup.pdf" (3 pages, 111289 bytes).
+ 99i,11n,101p,760b,763s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ </home/abraham/.miktex/texmfs/data/fonts/pk/ljfour/jknappen/ec/dpi600/tcrm10
+00.pk></home/abraham/.miktex/texmfs/install/fonts/type1/public/amsfonts/cm/cmbx
+10.pfb></home/abraham/.miktex/texmfs/install/fonts/type1/public/amsfonts/cm/cmb
+x12.pfb></home/abraham/.miktex/texmfs/install/fonts/type1/public/amsfonts/cm/cm
+r10.pfb></home/abraham/.miktex/texmfs/install/fonts/type1/public/amsfonts/cm/cm
+r12.pfb></home/abraham/.miktex/texmfs/install/fonts/type1/public/amsfonts/cm/cm
+r17.pfb></home/abraham/.miktex/texmfs/install/fonts/type1/public/amsfonts/cm/cm
+sy10.pfb></home/abraham/.miktex/texmfs/install/fonts/type1/public/amsfonts/cm/c
+mtt10.pfb>
+Output written on "Spark Setup.pdf" (3 pages, 112121 bytes).
 PDF statistics:
- 77 PDF objects out of 1000 (max. 8388607)
+ 72 PDF objects out of 1000 (max. 8388607)
  12 named destinations out of 1000 (max. 500000)
  13 words of extra memory for PDF output out of 10000 (max. 10000000)
 
