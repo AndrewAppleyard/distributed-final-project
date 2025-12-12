@@ -8,6 +8,10 @@ BACKEND_URL = os.environ.get("BACKEND_URL")
 
 @app.route("/")
 def home():
+    return render_template("home.html")
+
+@app.route("/old")
+def home():
     return render_template("index.html", backend_url=BACKEND_URL)
 
 @app.route("/landing")
