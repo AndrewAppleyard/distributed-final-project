@@ -26,5 +26,9 @@ def metrics():
 def search():
     return render_template("search.html")
 
+@app.route("/stock/<symbol>")
+def stock(symbol):
+    return render_template("stockpage.html", symbol=symbol.upper(), backend_url=BACKEND_URL)
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8800)

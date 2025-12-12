@@ -102,6 +102,7 @@
     padding: 0.9rem;
     color: #3d2e1f;
     box-shadow: 0 4px 0 #8a6d4e;
+    transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.2s ease;
 }
 
 .search-page .result-card h4 {
@@ -170,4 +171,10 @@
 .search-page .result-card .note {
     color: #5e452b;
     font-size: 0.9rem;
+}
+
+.search-page .stock-card:hover {
+    background: #f0d9b8;
+    box-shadow: 0 6px 0 #8a6d4e;
+    transform: translateY(-2px);
 }

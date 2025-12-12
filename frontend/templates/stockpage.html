@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Stock {{ symbol }} | Cardstock{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/stockpage.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="stock-page" id="stock-page" data-symbol="{{ symbol }}" data-backend="{{ backend_url or '' }}">
+    <div class="stock-hero card">
+        <div>
+            <p class="eyebrow">Stock detail</p>
+            <h1>{{ symbol }}</h1>
+            <p class="lede">Live quote, actions, and a future Grafana embed all on one cardboard board.</p>
+        </div>
+        <div class="chip-row">
+            <span class="chip">Buy</span>
+            <span class="chip">Sell</span>
+            <span class="chip">Update</span>
+            <span class="chip balance" id="balance-chip">Balance: --</span>
+        </div>
+    </div>
+
+    <div class="stock-grid">
+        <div class="card quote-card">
+            <div class="quote-header">
+                <h3>Quote</h3>
+                <span class="badge" id="quote-change"></span>
+            </div>
+            <div class="quote-price" id="quote-price">$0.00</div>
+            <p class="timestamp" id="quote-time"></p>
+            <div class="quote-grid">
+                <div><dt>Open</dt><dd id="quote-open">$0.00</dd></div>
+                <div><dt>Prev Close</dt><dd id="quote-prev">$0.00</dd></div>
+                <div><dt>High</dt><dd id="quote-high">$0.00</dd></div>
+                <div><dt>Low</dt><dd id="quote-low">$0.00</dd></div>
+            </div>
+        </div>
+
+        <div class="card actions-card">
+            <h3>Trade (placeholder)</h3>
+            <p class="muted">Hook into your buy/update/sell flows here.</p>
+            <div class="action-row">
+                <button id="buy-btn" class="cardboard-btn">Buy</button>
+                <button id="update-btn" class="cardboard-btn ghost hidden">Update</button>
+                <button id="sell-btn" class="cardboard-btn danger hidden">Sell</button>
+            </div>
+        </div>
+    </div>
+
+        <div class="card grafana-placeholder">
+            <p class="eyebrow">Coming soon</p>
+            <h3>Grafana chart embed</h3>
+            <p class="muted">Drop your Grafana iframe for {{ symbol }} here when ready.</p>
+        </div>
+    </div>
+
+    <div id="buy-modal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Buy {{ symbol }}</h3>
+            <button class="close-btn" id="buy-close" aria-label="Close">✕</button>
+        </div>
+        <p class="muted">Enter either shares or total amount; the other updates automatically using the current price.</p>
+        <form id="buy-form">
+            <label for="buy-shares">Shares</label>
+            <input type="number" id="buy-shares" name="shares" min="0" step="0.0001" inputmode="decimal" />
+
+            <label for="buy-amount">Amount (total spend)</label>
+            <input type="number" id="buy-amount" name="amount" min="0" step="0.01" inputmode="decimal" />
+
+            <div class="modal-actions">
+                <button type="button" class="cardboard-btn ghost" id="buy-cancel">Cancel</button>
+                <button type="submit" class="cardboard-btn">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="update-modal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Adjust {{ symbol }} position</h3>
+            <button class="close-btn" id="update-close" aria-label="Close">✕</button>
+        </div>
+        <p class="muted">Drag the slider to sell all on the left or use your full balance to buy on the right.</p>
+        <div class="slider-row">
+            <label for="update-slider" class="slider-label">Shares</label>
+            <input type="range" id="update-slider" min="0" max="0" step="0.0001" value="0" />
+        </div>
+        <div class="slider-follow"><span id="update-delta">0</span></div>
+        <div class="slider-readout tight">
+            <div><strong>Value impact:</strong> <span id="update-value">$0.00</span></div>
+            <div><strong>Resulting balance:</strong> <span id="update-balance">$0.00</span></div>
+        </div>
+        <div class="modal-actions">
+            <button type="button" class="cardboard-btn ghost" id="update-cancel">Cancel</button>
+            <button type="button" class="cardboard-btn" id="update-confirm">Submit</button>
+        </div>
+    </div>
+</div>
+
+<div id="sell-modal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Sell {{ symbol }}</h3>
+            <button class="close-btn" id="sell-close" aria-label="Close">✕</button>
+        </div>
+        <p class="warning-text">Are you sure you want to sell ALL of your shares of this stock?</p>
+        <div class="modal-actions">
+            <button type="button" class="cardboard-btn ghost" id="sell-cancel">Cancel</button>
+            <button type="button" class="cardboard-btn danger" id="sell-confirm">Yes, sell</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/stockpage.js') }}"></script>
+{% endblock %}

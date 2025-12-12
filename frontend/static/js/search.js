@@ -41,6 +41,14 @@ function renderResults(list) {
                 badge.classList.toggle("down", item.change < 0);
             }
 
+            const card = clone.querySelector(".stock-card");
+            if (card && item.symbol) {
+                card.dataset.symbol = item.symbol;
+                card.addEventListener("click", () => {
+                    window.location.href = `/stock/${encodeURIComponent(item.symbol)}`;
+                });
+            }
+
             results.appendChild(clone);
         });
         return;
@@ -51,7 +59,7 @@ function renderResults(list) {
             const badgeClass = item.change >= 0 ? "up" : "down";
             const badgeText = `${item.changeText || ""} ${item.percentText || ""}`.trim();
             return `
-                <div class="result-card">
+                <div class="result-card stock-card" data-symbol="${item.symbol || ""}" onclick="window.location.href='/stock/${item.symbol || ""}'">
                     <div class="symbol">${item.symbol}</div>
                     <h4>${item.name || "Quote"}</h4>
                     <div class="row">
