@@ -16,19 +16,19 @@ def legacy_dashboard():
 
 @app.route("/home")
 def home():
-    return render_template("home.html")
+    return render_template("home.html", backend_url=BACKEND_URL)
 
 @app.route("/portfolio")
 def portfolio():
-    return render_template("portfolio.html")
+    return render_template("portfolio.html", backend_url=BACKEND_URL)
 
 @app.route("/metrics")
 def metrics():
-    return render_template("metrics.html")
+    return render_template("metrics.html", backend_url=BACKEND_URL)
 
 @app.route("/search")
 def search():
-    return render_template("search.html")
+    return render_template("search.html", backend_url=BACKEND_URL)
 
 @app.route("/stock/<symbol>")
 def stock(symbol):

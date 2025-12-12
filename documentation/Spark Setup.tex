@@ -96,7 +96,7 @@
     \item \texttt{POST /trades} --- create; debits balance (e.g. \verb|{"symbol":"AAPL","shares":5,"buy_price":180}|).
     \item \texttt{PUT /trades/\{symbol\}} --- update price/shares; adjusts balance (e.g. \verb|{"new_price":185,"delta_shares":1,"current_price":190}|).
     \item \texttt{DELETE /trades/\{symbol\}} --- delete/sell; optional body \verb|{"sale_price":190}| to compute net gain and credit balance.
-    \item \texttt{GET /cache} --- inspect in-memory price cache (refreshed every 5s for tracked symbols).
+    \item \texttt{GET /cache} --- inspect in-memory price cache (refreshed every 5s for tracked symbols; re-populates after trades are created/updated).
     \item \texttt{GET /quote/\{symbol\}} --- fetch latest quote via finnhub client; 502 if upstream fails.
     \item Price polling (optional): polls \texttt{PRICE\_SYMBOLS} every \texttt{PRICE\_POLL\_INTERVAL} seconds and writes to Influx \texttt{prices} when \texttt{INFLUXDB\_TOKEN} is set.
   \end{itemize}

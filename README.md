@@ -39,7 +39,7 @@ This project runs a small Spark cluster plus three app services:
 - `PUT /trades/{symbol}` – adjust price/shares (e.g. `{"new_price":185,"delta_shares":1,"current_price":190}`)
 - `DELETE /trades/{symbol}` – delete/sell; optional `{"sale_price":190}` to credit balance and compute net gain
 - `GET /quote/{symbol}` – fetch latest quote via finnhub-client; returns 502 if upstream fails
-- `GET /cache` – view in-memory price cache (refreshed every 5s for tracked symbols)
+- `GET /cache` – view in-memory price cache (refreshed every 5s for tracked symbols; re-populates after trades are created/updated)
 - Price polling: when `PRICE_SYMBOLS` and `INFLUXDB_TOKEN` are set, the backend polls those symbols every `PRICE_POLL_INTERVAL` seconds and writes to InfluxDB (`prices` measurement).
 
 ## Finnhub Client (FastAPI on :8001)
@@ -60,4 +60,3 @@ This project runs a small Spark cluster plus three app services:
 - Master URL: `spark://spark-master:7077`
 - Workers (compose) are capped at `SPARK_WORKER_CORES=2`, `SPARK_WORKER_MEMORY=2g`.
 - Backend submits Spark jobs using `SparkSession.builder.master("spark://spark-master:7077")` with driver ports 35000/35001 exposed in compose/stack.
-
