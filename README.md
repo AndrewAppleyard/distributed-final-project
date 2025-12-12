@@ -61,9 +61,3 @@ This project runs a small Spark cluster plus three app services:
 - Workers (compose) are capped at `SPARK_WORKER_CORES=2`, `SPARK_WORKER_MEMORY=2g`.
 - Backend submits Spark jobs using `SparkSession.builder.master("spark://spark-master:7077")` with driver ports 35000/35001 exposed in compose/stack.
 
-## Troubleshooting
-- 502 from Finnhub: usually upstream rate/connection issues; retry or check `FINNHUB_API_KEY`.
-- Price cache empty: symbols are only cached after trades or if listed in `PRICE_SYMBOLS`.
-- NameError for `Set`: rebuild backend image without cache (`docker compose build --no-cache backend`).
-- Spark connection errors: ensure containers share the `spark-net` network (compose/stack does this) and that master is healthy at `spark-master:7077`.
-
