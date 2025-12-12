@@ -5,6 +5,8 @@ services:
     command: ["/opt/spark/sbin/start-master.sh"]
     environment:
       - SPARK_NO_DAEMONIZE=true
+      - PYSPARK_PYTHON=python3
+      - PYSPARK_DRIVER_PYTHON=python3
     ports:
       - "7077:7077"
       - "8080:8080"
@@ -19,8 +21,25 @@ services:
     command: ["/opt/spark/sbin/start-worker.sh", "spark://spark-master:7077"]
     environment:
       - SPARK_NO_DAEMONIZE=true
+      - PYSPARK_PYTHON=python3
+      - PYSPARK_DRIVER_PYTHON=python3
     ports:
       - "8081:8081"
+    networks:
+      - sparknet
+
+  spark-worker-2:
+    image: apache/spark:3.5.6
+    container_name: spark-worker-2
+    depends_on:
+      - spark-master
+    command: ["/opt/spark/sbin/start-worker.sh", "spark://spark-master:7077"]
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+      - PYSPARK_PYTHON=python3
+      - PYSPARK_DRIVER_PYTHON=python3
+    ports:
+      - "8082:8082"
     networks:
       - sparknet
 
@@ -33,6 +52,8 @@ services:
       - INFLUXDB_TOKEN=${INFLUXDB_ADMIN_TOKEN:-local-token}
       - INFLUXDB_ORG=${INFLUXDB_ORG:-trading}
       - INFLUXDB_BUCKET=${INFLUXDB_BUCKET:-market_data}
+      - PYSPARK_PYTHON=python3
+      - PYSPARK_DRIVER_PYTHON=python3
     ports:
       - "4000:4000"
     networks:

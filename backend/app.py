@@ -1,6 +1,8 @@
 import os
+import threading
+import time
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Dict
 
 import requests
 from fastapi import FastAPI, HTTPException
@@ -43,6 +45,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+price_cache: Dict[str, Optional[float]] = {}
+cache_lock = threading.Lock()
 
 
 class TradeCreate(BaseModel):
@@ -59,6 +63,10 @@ class TradeUpdate(BaseModel):
     new_price: float = Field(..., gt=0)
 
 
+class TradeSell(BaseModel):
+    sale_price: float = Field(..., gt=0)
+
+
 def fetch_quote(symbol: str) -> Optional[float]:
     url = API_URL.rstrip("/")
     target = f"{url}/{symbol.upper()}" if symbol else url
@@ -69,6 +77,35 @@ def fetch_quote(symbol: str) -> Optional[float]:
         return data.get("current") or data.get("price")
     except Exception:
         return None
+
+
+def get_cached_price(symbol: str) -> Optional[float]:
+    with cache_lock:
+        return price_cache.get(symbol.upper())
+
+
+def update_price_cache():
+    """Background loop to refresh prices for current portfolio symbols."""
+    while True:
+        try:
+            symbols = [
+                row.symbol
+                for row in portfolio.select("symbol").distinct().collect()
+                if row.symbol
+            ]
+            for sym in symbols:
+                latest = fetch_quote(sym)
+                with cache_lock:
+                    price_cache[sym.upper()] = latest
+            # prune cache entries for symbols no longer in portfolio
+            with cache_lock:
+                existing = set(price_cache.keys())
+                keep = {s.upper() for s in symbols}
+                for stale in existing - keep:
+                    price_cache.pop(stale, None)
+        except Exception:
+            pass
+        time.sleep(5)
 
 
 @app.get("/health")
@@ -86,6 +123,12 @@ def read_portfolio():
     return [row.asDict() for row in portfolio.collect()]
 
 
+@app.get("/cache")
+def read_cache():
+    with cache_lock:
+        return dict(price_cache)
+
+
 @app.post("/trades")
 def create_trade(trade: TradeCreate):
     global portfolio
@@ -94,6 +137,8 @@ def create_trade(trade: TradeCreate):
     new_row = [(trade.symbol, trade.shares, trade.buy_price, buy_time, buy_value)]
     new_df = spark.createDataFrame(new_row, portfolio.schema)
     portfolio = portfolio.union(new_df)
+    with cache_lock:
+        price_cache.pop(trade.symbol, None)
     return {"status": "created", "trade": trade.dict(), "timestamp": buy_time}
 
 
@@ -114,6 +159,9 @@ def update_trade(symbol: str, payload: TradeUpdate):
         ),
     )
 
+    with cache_lock:
+        price_cache.pop(symbol, None)
+
     return {
         "status": "updated",
         "symbol": symbol,
@@ -122,7 +170,7 @@ def update_trade(symbol: str, payload: TradeUpdate):
 
 
 @app.delete("/trades/{symbol}")
-def delete_trade(symbol: str):
+def delete_trade(symbol: str, payload: Optional[TradeSell] = None):
     global portfolio
     symbol = symbol.upper()
     rows = portfolio.filter(col("symbol") == symbol).collect()
@@ -130,18 +178,36 @@ def delete_trade(symbol: str):
         raise HTTPException(status_code=404, detail="Symbol not found")
 
     buy_row = rows[0]
-    current_price = fetch_quote(symbol)
     net_gain = None
-    if current_price is not None:
-        net_gain = (current_price - buy_row.buy_price) * buy_row.shares
+    sale_price = None
 
+    # prefer explicit sale_price from payload if provided
+    if payload and payload.sale_price:
+        sale_price = payload.sale_price
+    else:
+        with cache_lock:
+            cached = price_cache.get(symbol.upper())
+        if cached is not None:
+            sale_price = cached
+
+    if sale_price is not None:
+        net_gain = (sale_price - buy_row.buy_price) * buy_row.shares
+
+
+    # Remove the trade without blocking on quote lookups.
     portfolio = portfolio.filter(col("symbol") != symbol)
+    with cache_lock:
+        price_cache.pop(symbol, None)
 
     return {
         "status": "deleted",
         "symbol": symbol,
         "shares": buy_row.shares,
         "buy_price": buy_row.buy_price,
-        "current_price": current_price,
+        "sale_price": sale_price,
         "net_gain": net_gain,
     }
+
+
+# start background price cache refresher
+threading.Thread(target=update_price_cache, daemon=True).start()

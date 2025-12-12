@@ -21,6 +21,8 @@ services:
     environment:
       - SPARK_NO_DAEMONIZE=true
       - SPARK_DAEMON_JAVA_OPTS=-Dspark.deploy.recoveryMode=ZOOKEEPER -Dspark.deploy.zookeeper.url=zookeeper:2181 -Dspark.deploy.zookeeper.dir=/spark-ha
+      - PYSPARK_PYTHON=python3
+      - PYSPARK_DRIVER_PYTHON=python3
     ports:
       - "7077:7077"
       - "8080:8080"
@@ -38,6 +40,8 @@ services:
     command: ["/opt/spark/sbin/start-worker.sh", "spark://spark-master:7077"]
     environment:
       - SPARK_NO_DAEMONIZE=true
+      - PYSPARK_PYTHON=python3
+      - PYSPARK_DRIVER_PYTHON=python3
     networks:
       - sparknet
     deploy:
