@@ -2,6 +2,7 @@ apiVersion: 1
 
 datasources:
   - name: InfluxDB
+    uid: af6w3lxl7pnuoa
     type: influxdb
     access: proxy
     url: http://influxdb:8086
@@ -10,5 +11,6 @@ datasources:
       version: Flux
       organization: ${INFLUXDB_ORG}
       defaultBucket: ${INFLUXDB_BUCKET}
+      timeInterval: 10s
     secureJsonData:
       token: ${INFLUXDB_TOKEN}

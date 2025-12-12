@@ -55,8 +55,10 @@
     \item \texttt{INFLUXDB\_PASSWORD=}
     \item \texttt{INFLUXDB\_ORG=}
     \item \texttt{INFLUXDB\_BUCKET=}
+    \item \texttt{GRAFANA\_USER=}
+    \item \texttt{GRAFANA\_PASSWORD=}
   \end{itemize}
-  \item Ensure ports 4000, 7077, 8001, 8080, 8081, 8082, 8086, 8800 are free.
+  \item Ensure ports 3000, 4000, 7077, 8001, 8080, 8081, 8082, 8086, 8800, 35000, 350001 are free.
 \end{enumerate}
 
 \subsection*{Run the Containers (Exact Commands)}
@@ -89,6 +91,7 @@
     \item \texttt{PUT /trades/\{symbol\}} --- update buy price (e.g., \texttt{\{"new\_price":185\}}).
     \item \texttt{DELETE /trades/\{symbol\}} --- delete/sell a trade; optional body \texttt{\{"sale\_price":190\}} to compute net gain.
     \item \texttt{GET /cache} --- view in-memory price cache (refreshed every 5s for tracked symbols).
+    \item Price polling (optional): backend can poll quotes for symbols in \texttt{PRICE\_SYMBOLS} every \texttt{PRICE\_POLL\_INTERVAL} seconds and write to Influx (\texttt{prices} measurement) when \texttt{INFLUXDB\_TOKEN} is set.
   \end{itemize}
   \item Finnhub quote API: \texttt{http://localhost:8001/quote/\{symbol\}} (uses \texttt{FINNHUB\_API\_KEY}).
   \item Grafana (optional dashboards): \texttt{http://localhost:3000}.

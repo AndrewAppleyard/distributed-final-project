@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.12.8)  12 DEC 2025 09:49
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.12.8)  12 DEC 2025 11:30
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -984,21 +984,21 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) [1
 
 {/home/abraham/.miktex/texmfs/data/fonts/map/pdftex/pdftex.map}]
-Overfull \hbox (31.03094pt too wide) in paragraph at lines 67--68
+Overfull \hbox (31.03094pt too wide) in paragraph at lines 69--70
 []\OT1/cmr/m/n/10 Spark services: master + two workers come up via compose; wor
 kers are limited to \OT1/cmtt/m/n/10 SPARK[]WORKER[]CORES=2
  []
 
 LaTeX Font Info:    Trying to load font information for OMS+cmtt on input line 
-88.
-LaTeX Font Info:    No file OMScmtt.fd. on input line 88.
+90.
+LaTeX Font Info:    No file OMScmtt.fd. on input line 90.
 
 LaTeX Font Warning: Font shape `OMS/cmtt/m/n' undefined
 (Font)              using `OMS/cmsy/m/n' instead
-(Font)              for symbol `textbraceleft' on input line 88.
+(Font)              for symbol `textbraceleft' on input line 90.
 
 
-Overfull \hbox (9.11118pt too wide) in paragraph at lines 90--91
+Overfull \hbox (9.11118pt too wide) in paragraph at lines 92--93
 []\OT1/cmtt/m/n/10 DELETE /trades/\OMS/cmtt/m/n/10 f\OT1/cmtt/m/n/10 symbol\OMS
 /cmtt/m/n/10 g \OT1/cmr/m/n/10 --- delete/sell a trade; optional body \OMS/cmtt
 /m/n/10 f\OT1/cmtt/m/n/10 "sale[]price":190\OMS/cmtt/m/n/10 g \OT1/cmr/m/n/10 t
@@ -1010,8 +1010,16 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.92   \end{itemize}
-                     [1] [2] (Spark Setup.aux)
+l.93     \item \texttt
+                      {GET /cache} --- view in-memory price cache (refreshed...
+[1]
+Overfull \hbox (50.41116pt too wide) in paragraph at lines 94--95
+[]\OT1/cmr/m/n/10 Price polling (optional): backend can poll quotes for symbols
+ in \OT1/cmtt/m/n/10 PRICE[]SYMBOLS \OT1/cmr/m/n/10 every \OT1/cmtt/m/n/10 PRIC
+E[]POLL[]INTERVAL
+ []
+
+[2] (Spark Setup.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-02-20>
@@ -1026,7 +1034,7 @@ Package rerunfilecheck Info: File `"Spark Setup".out' has not changed.
 Here is how much of TeX's memory you used:
  34025 strings out of 476385
  778982 string characters out of 5794170
- 1939187 words of memory out of 5000000
+ 1938187 words of memory out of 5000000
  55556 multiletter control sequences out of 15000+600000
  564736 words of font info for 61 fonts, out of 8000000 for 9000
  0 hyphenation exceptions out of 8191
@@ -1040,7 +1048,7 @@ r12.pfb></home/abraham/.miktex/texmfs/install/fonts/type1/public/amsfonts/cm/cm
 r17.pfb></home/abraham/.miktex/texmfs/install/fonts/type1/public/amsfonts/cm/cm
 sy10.pfb></home/abraham/.miktex/texmfs/install/fonts/type1/public/amsfonts/cm/c
 mtt10.pfb>
-Output written on "Spark Setup.pdf" (3 pages, 113152 bytes).
+Output written on "Spark Setup.pdf" (3 pages, 113947 bytes).
 PDF statistics:
  72 PDF objects out of 1000 (max. 8388607)
  12 named destinations out of 1000 (max. 500000)
