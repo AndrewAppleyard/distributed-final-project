@@ -58,6 +58,7 @@ async function deleteTrade() {
 
 async function loadPortfolio() {
   const resBox = document.getElementById("portfolio");
+  if (!resBox) return;
   try {
     const res = await fetch(`${backendBase}/portfolio`);
     resBox.textContent = JSON.stringify(await res.json(), null, 2);
@@ -66,4 +67,7 @@ async function loadPortfolio() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", loadPortfolio);
+document.addEventListener("DOMContentLoaded", () => {
+  const resBox = document.getElementById("portfolio");
+  if (resBox) loadPortfolio();
+});

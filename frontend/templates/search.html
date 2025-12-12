@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Search | Cardstock{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/search.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="search-page">
+    <div class="page-header">
+        <div>
+            <p class="eyebrow">Scout New Ideas</p>
+            <h1>Stock Search</h1>
+            <p class="lede">Search for tickers, skim the quick stats, and pin cardboard notes for future paper trades.</p>
+        </div>
+    </div>
+
+    <form class="card search-form" id="search-form">
+        <label for="search-input">Find a ticker</label>
+        <div class="input-row">
+            <input id="search-input" name="query" placeholder="AAPL, TSLA, NVDA..." autocomplete="off" />
+            <button type="submit" class="cardboard-btn">Search</button>
+        </div>
+        <p class="muted">Search runs against demo data to keep the UI lively without an API call.</p>
+    </form>
+
+    <div class="card results-card">
+        <div class="board-header">
+            <div>
+                <p class="eyebrow">Results</p>
+                <h3>Cardboard notes</h3>
+            </div>
+        </div>
+        <div id="search-results" class="result-grid"></div>
+    </div>
+</div>
+
+{% include "stock.html" %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/search.js') }}"></script>
+{% endblock %}

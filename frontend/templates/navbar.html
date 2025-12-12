@@ -1,0 +1,39 @@
+<div id="sidebar">
+    <div class="nav-header">
+        <h2>CARDSTOCK</h2>
+    </div>
+
+    <form id="nav-search" class="nav-search" action="/search" method="get">
+        <label for="nav-search-input">Search ticker</label>
+        <div class="search-row">
+            <input id="nav-search-input" name="symbol" placeholder="AAPL" autocomplete="off" />
+            <button type="submit" aria-label="Search">
+                <i class="bi bi-box2-fill" aria-hidden="true"></i>
+            </button>
+        </div>
+    </form>
+
+    <ul class="nav-menu">
+        <li>
+            <a href="/home" class="icon-link">
+                <span class="icon-badge landing" aria-label="Landing">
+                    <i class="bi bi-house-fill" aria-hidden="true"></i>
+                </span>
+            </a>
+        </li>
+        <li>
+            <a href="/portfolio" class="icon-link">
+                <span class="icon-badge portfolio" aria-label="Portfolio">
+                    <i class="bi bi-briefcase-fill" aria-hidden="true"></i>
+                </span>
+            </a>
+        </li>
+        <li>
+            <a href="/metrics" class="icon-link">
+                <span class="icon-badge metrics" aria-label="Metrics">
+                    <i class="bi bi-bar-chart-fill" aria-hidden="true"></i>
+                </span>
+            </a>
+        </li>
+    </ul>
+</div>
