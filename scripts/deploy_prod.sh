@@ -2,6 +2,7 @@
 set -euo pipefail
 
 # sudo docker swarm init --advertise-addr <your-ip>
+# sudo ./scripts/deploy_prod.sh to start the swarm from the project root directory
 # Inspect swarm status: sudo docker info | grep -A3 "Swarm"
 # List swarm nodes:     sudo docker node ls
 # List stack services:  sudo docker stack services distributed

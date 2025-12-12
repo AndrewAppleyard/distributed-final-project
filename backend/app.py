@@ -39,12 +39,16 @@ last_price_write_time: Opt[datetime] = None
 START_BALANCE = float(os.environ.get("START_BALANCE", 3000))
 
 spark = (
-    SparkSession.builder.appName("StockCRUD")
-    .master(SPARK_MASTER_URL)
+    SparkSession.builder
+    .appName("StockCRUD")
+    .master("spark://spark-master:7077")
     .config("spark.driver.bindAddress", "0.0.0.0")
     .config("spark.driver.host", "backend")
+    .config("spark.driver.port", "35000")
+    .config("spark.blockManager.port", "35001")
     .getOrCreate()
 )
+
 
 portfolio_schema = StructType(
     [
@@ -311,12 +315,7 @@ def create_trade(trade: TradeCreate):
     portfolio = portfolio.union(new_df)
     # Writes to database
     write_portfolio_to_influx()
-    with cache_lock:
-        price_cache.pop(trade.symbol, None)
-        symbol_set.add(trade.symbol)
-    with balance_lock:
-        current_balance = balance_amount
-    return {"status": "created", "trade": trade.dict(), "timestamp": buy_time, "balance": current_balance}
+    return {"status": "created", "trade": trade.dict(), "timestamp": buy_time}
 
 
 @app.put("/trades/{symbol}")
