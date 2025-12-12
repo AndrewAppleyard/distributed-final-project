@@ -24,7 +24,7 @@
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "ef6w0mkrmguf4f"
+        "uid": "af6w3lxl7pnuoa"
       },
       "fieldConfig": {
         "defaults": {
@@ -97,23 +97,12 @@
       },
       "id": 1,
       "options": {
-        "candleStyle": "candles",
-        "candlestick": {
-          "drawStyle": "candles"
-        },
-        "colorStrategy": "open-close",
-        "colors": {
-          "down": "red",
-          "up": "green"
-        },
-        "includeAllFields": false,
         "legend": {
           "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
           "showLegend": true
         },
-        "mode": "candles+volume",
         "tooltip": {
           "mode": "single",
           "sort": "none"
@@ -125,13 +114,13 @@
             "type": "influxdb",
             "uid": "${DS_INFLUXDB}"
           },
-          "query": "from(bucket: \"user_data\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"prices\")\n  |> filter(fn: (r) => r.symbol == \"AAPL\")\n  |> filter(fn: (r) => r._field == \"open\" or r._field == \"price\")\n  |> pivot(rowKey: [\"_time\", \"symbol\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> rename(columns: {price: \"close\"})\n  |> keep(columns: [\"_time\", \"symbol\", \"open\", \"close\"])\n  |> map(fn: (r) => ({ _time: r._time, symbol: r.symbol, open: r.open, close: r.close, high: if r.open > r.close then r.open else r.close, low: if r.open < r.close then r.open else r.close }))",
+          "query": "from(bucket: \"user_data\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"prices\")\n  |> filter(fn: (r) => r.symbol == \"AAPL\")\n  |> filter(fn: (r) => r._field == \"price\")\n  |> keep(columns: [\"_time\", \"_value\", \"symbol\"])",
           "refId": "A"
         }
       ],
       "timeFrom": "30m",
-      "title": "Prices (candles)",
-      "type": "candlestick"
+      "title": "Stock Price",
+      "type": "timeseries"
     }
   ],
   "refresh": "5s",
