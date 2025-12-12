@@ -1,31 +1,58 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Distributed Systems Final</title>
-</head>
-<body data-backend-url="{{ backend_url }}">
-<h1>Example API Data</h1>
-<pre id="payload">test</pre>
+  <head>
+    <title>Trading Dashboard</title>
+    <link rel="stylesheet" href="../static/css/index.css">
+  </head>
+  <body data-backend-url="{{ backend_url }}">
+      <h1>Trading Dashboard</h1>
+      <p>Backend: <code id="backend-url"></code></p>
 
-<script>
-    const configuredBackend = document.body.dataset.backendUrl;
-    const backendBase = configuredBackend || "http://localhost:4000";
-    const dataUrl = `${backendBase}/data`;
+      <div class="row">
+        <div class="card half">
+          <h3>Create Trade</h3>
+          <label>Symbol</label><input id="create-symbol" placeholder="AAPL" />
+          <label>Shares</label><input id="create-shares" type="number"
+            placeholder="10" />
+          <label>Buy Price</label><input id="create-price" type="number"
+            step="0.01" placeholder="150.50" />
+          <button onclick="createTrade()">Create</button>
+          <pre id="create-result"></pre>
+        </div>
 
-    async function loadData() {
-        const output = document.getElementById("payload");
-        if (!output) return;
-        try {
-            const res = await fetch(dataUrl);
-            if (!res.ok) throw new Error((await res.text()));
-            const data = await res.json();
-            output.textContent = JSON.stringify(data, null, 2);
-        } catch (err) {
-            output.textContent = `Error: ${err.message}`;
-        }
-    }
+        <div class="card half">
+          <h3>Update Trade Price</h3>
+          <label>Symbol</label><input id="update-symbol" placeholder="AAPL" />
+          <label>New Price</label><input id="update-price" type="number"
+            step="0.01" placeholder="155.00" />
+          <button onclick="updateTrade()">Update</button>
+          <pre id="update-result"></pre>
+        </div>
+      </div>
+      <div class="row">
+        <div class="card half">
+          <h3>Delete Trade</h3>
+          <label>Symbol</label><input id="delete-symbol" placeholder="AAPL" />
+          <button onclick="deleteTrade()">Delete</button>
+          <pre id="delete-result"></pre>
+        </div>
 
-    document.addEventListener("DOMContentLoaded", loadData);
-</script>
-</body>
-</html>
+        <div class="card half">
+          <h3>Portfolio</h3>
+          <button onclick="loadPortfolio()">Refresh</button>
+          <pre id="portfolio"></pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Notes</h3>
+        <p>Use Grafana (port 3000) for rich dashboards. This page calls the
+          backend FastAPI for simple CRUD on the Spark-backed portfolio.</p>
+      </div>
+
+      <script>
+        window.BACKEND_URL = "{{ backend_url }}";
+      </script>
+      <script src="../static/js/index.js"></script>
+    </body>
+  </html>

@@ -1,5 +1,5 @@
 
-FROM python:3.11-slim
+FROM python:3.8-slim
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -22,4 +22,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["python", "app.py"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "4000"]
