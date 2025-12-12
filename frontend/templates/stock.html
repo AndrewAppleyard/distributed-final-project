@@ -1,0 +1,30 @@
+<template id="stock-card-template">
+    <div class="result-card stock-card">
+        <div class="symbol" data-field="symbol"></div>
+        <h4 data-field="name"></h4>
+        <div class="row meta-row">
+            <span class="badge up" data-field="changeBadge"></span>
+            <span class="price" data-field="price"></span>
+        </div>
+        <div class="quote-grid">
+            <div>
+                <dt>Open</dt>
+                <dd data-field="open"></dd>
+            </div>
+            <div>
+                <dt>Prev Close</dt>
+                <dd data-field="prevClose"></dd>
+            </div>
+            <div>
+                <dt>High</dt>
+                <dd data-field="high"></dd>
+            </div>
+            <div>
+                <dt>Low</dt>
+                <dd data-field="low"></dd>
+            </div>
+        </div>
+        <p class="note" data-field="note"></p>
+        <p class="timestamp" data-field="timestamp"></p>
+    </div>
+</template>

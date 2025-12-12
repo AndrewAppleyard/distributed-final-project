@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Cardstock{% endblock %}</title>
+
+    <!-- Global Styles -->
+    {% include "stylesheets.html" %}
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+    {% include "navbar.html" %}
+
+    <div id="main">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Global Scripts -->
+    {% include "scripts.html" %}
+
+    {% block extra_js %}{% endblock %}
+
+</body>
+</html>

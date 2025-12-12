@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Portfolio | Cardstock{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/portfolio.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="portfolio-page">
+    <div class="page-header">
+        <div>
+            <p class="eyebrow">Holdings Overview</p>
+            <h1>Portfolio</h1>
+            <p class="lede">Peek at your cardboard-friendly positions, cash, and ideas before placing your next paper trade.</p>
+        </div>
+        <button class="cardboard-btn" id="refresh-portfolio">Refresh board</button>
+    </div>
+
+    <div class="stat-grid">
+        <div class="card stat-card">
+            <p class="label">Total equity</p>
+            <h2 id="stat-equity">$0</h2>
+            <p class="muted" id="stat-equity-change">Day move: --</p>
+        </div>
+        <div class="card stat-card">
+            <p class="label">Available cash</p>
+            <h2 id="stat-cash">$0</h2>
+            <p class="muted">Dry powder for the next idea.</p>
+        </div>
+        <div class="card stat-card">
+            <p class="label">Top mover</p>
+            <h2 id="stat-mover">--</h2>
+            <p class="muted" id="stat-mover-change">Waiting for an update.</p>
+        </div>
+    </div>
+
+    <div class="card board positions-card">
+        <div class="board-header">
+            <div>
+                <p class="eyebrow">Positions</p>
+                <h3>Cardstock holdings</h3>
+            </div>
+            <span class="tag">Simulated</span>
+        </div>
+        <div id="positions-list" class="positions-grid"></div>
+    </div>
+
+    <div class="card board watchlist-card">
+        <div class="board-header">
+            <div>
+                <p class="eyebrow">Watchlist</p>
+                <h3>Pin ideas to the cardboard</h3>
+            </div>
+            <span class="tag soft">Curated</span>
+        </div>
+        <div id="watchlist" class="watchlist-grid"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/portfolio.js') }}"></script>
+{% endblock %}

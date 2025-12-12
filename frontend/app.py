@@ -10,5 +10,21 @@ BACKEND_URL = os.environ.get("BACKEND_URL")
 def home():
     return render_template("index.html", backend_url=BACKEND_URL)
 
+@app.route("/landing")
+def landing():
+    return render_template("home.html")
+
+@app.route("/portfolio")
+def portfolio():
+    return render_template("portfolio.html")
+
+@app.route("/metrics")
+def metrics():
+    return render_template("metrics.html")
+
+@app.route("/search")
+def search():
+    return render_template("search.html")
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8800)
