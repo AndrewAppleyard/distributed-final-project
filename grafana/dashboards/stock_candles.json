@@ -18,13 +18,13 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 7,
+  "id": 1,
   "links": [],
   "panels": [
     {
       "datasource": {
         "type": "influxdb",
-        "uid": "ff6vx2w3o88aoa"
+        "uid": "ef6w0mkrmguf4f"
       },
       "fieldConfig": {
         "defaults": {
@@ -90,8 +90,8 @@
         ]
       },
       "gridPos": {
-        "h": 12,
-        "w": 16,
+        "h": 13,
+        "w": 17,
         "x": 4,
         "y": 0
       },
@@ -129,6 +129,7 @@
           "refId": "A"
         }
       ],
+      "timeFrom": "30m",
       "title": "Prices (candles)",
       "type": "candlestick"
     }
@@ -140,7 +141,7 @@
     "list": []
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-30m",
     "to": "now"
   },
   "timepicker": {},
