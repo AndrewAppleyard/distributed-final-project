@@ -1,5 +1,6 @@
 import os
 import finnhub
+import time
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 
@@ -29,6 +30,7 @@ def get_quote(symbol: str):
             "open": quote.get("o"),
             "prev_close": quote.get("pc"),
             "timestamp": quote.get("t"),
+            "fetched_at": int(time.time()),
         }
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Finnhub error: {e}")

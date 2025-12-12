@@ -15,10 +15,10 @@
             <p class="lede">Live quote, actions, and a future Grafana embed all on one cardboard board.</p>
         </div>
         <div class="chip-row">
-            <span class="chip">Buy</span>
-            <span class="chip">Sell</span>
-            <span class="chip">Update</span>
             <span class="chip balance" id="balance-chip">Balance: --</span>
+            <button class="cardboard-btn icon-only small" id="balance-refresh" aria-label="Refresh balance">
+                <i class="bi bi-arrow-counterclockwise"></i>
+            </button>
         </div>
     </div>
 
@@ -29,7 +29,10 @@
                 <span class="badge" id="quote-change"></span>
             </div>
             <div class="quote-price" id="quote-price">$0.00</div>
-            <p class="timestamp" id="quote-time"></p>
+            <div class="timestamp-row">
+                <p class="timestamp" id="quote-time"></p>
+                <p class="timestamp secondary" id="quote-fetched"></p>
+            </div>
             <div class="quote-grid">
                 <div><dt>Open</dt><dd id="quote-open">$0.00</dd></div>
                 <div><dt>Prev Close</dt><dd id="quote-prev">$0.00</dd></div>

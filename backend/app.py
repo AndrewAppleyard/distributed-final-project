@@ -53,6 +53,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 price_cache: Dict[str, Optional[float]] = {}
+quote_payload_cache: Dict[str, Dict] = {}  # symbol -> {"data": payload, "ts": epoch}
+# shorten TTL so quote consumers (stock page/search/portfolio/metrics) see fresher prices
+QUOTE_TTL_SECONDS = 5
 symbol_set: Set[str] = set()
 cache_lock = threading.Lock()
 balance_lock = threading.Lock()
@@ -80,16 +83,26 @@ class TradeSell(BaseModel):
     sale_price: float = Field(..., gt=0)
 
 
-def fetch_quote(symbol: str) -> Optional[float]:
-    payload = fetch_quote_payload(symbol)
+def fetch_quote(symbol: str, force: bool = False) -> Optional[float]:
+    payload = fetch_quote_payload(symbol, force=force)
     if not payload:
         return None
     return payload.get("current") or payload.get("price")
 
 
-def fetch_quote_payload(symbol: str) -> Optional[Dict]:
+def fetch_quote_payload(symbol: str, force: bool = False) -> Optional[Dict]:
+    now = time.time()
+    sym = symbol.upper()
+    if not force:
+        with cache_lock:
+            cached = quote_payload_cache.get(sym)
+            if cached and now - cached.get("ts", 0) < QUOTE_TTL_SECONDS:
+                return cached.get("data")
     url = API_URL.rstrip("/")
     target = f"{url}/{symbol.upper()}" if symbol else url
+    # When force is true, bypass cached responses entirely (and avoid polluting the cache)
+    if force:
+        target = f"{target}?_ts={int(now * 1000)}"
     try:
         resp = requests.get(target, timeout=10)
         resp.raise_for_status()
@@ -97,6 +110,11 @@ def fetch_quote_payload(symbol: str) -> Optional[Dict]:
         data["symbol"] = data.get("symbol") or symbol.upper()
         if "current" not in data and "price" in data:
             data["current"] = data["price"]
+        # Attach the fetch time so frontends can show when this payload was retrieved.
+        data["fetched_at"] = int(now)
+        if not force:
+            with cache_lock:
+                quote_payload_cache[sym] = {"data": data, "ts": now}
         return data
     except Exception:
         return None
@@ -162,8 +180,8 @@ def read_cache():
 
 
 @app.get("/quote/{symbol}")
-def read_quote(symbol: str):
-    payload = fetch_quote_payload(symbol)
+def read_quote(symbol: str, force: bool = False):
+    payload = fetch_quote_payload(symbol, force=force)
     if payload is None:
         raise HTTPException(status_code=502, detail="Quote lookup failed")
     return payload

@@ -87,10 +87,22 @@
     color: #f6f6f6;
 }
 
+.timestamp-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.4rem;
+}
+
 .timestamp {
     font-size: 0.9rem;
     color: #9aabc1;
-    margin-bottom: 0.4rem;
+    margin: 0;
+}
+
+.timestamp.secondary {
+    color: #7f91a8;
 }
 
 .actions-card {
@@ -108,7 +120,6 @@
 .actions-card .sell-estimate {
     margin-top: 0.5rem;
     font-weight: bold;
-    color: #0f9d58;
 }
 
 .cardboard-btn {
@@ -163,6 +174,23 @@
 
 .hidden {
     display: none !important;
+}
+
+.pl-positive { color: #0f9d58; }
+.pl-negative { color: #c0392b; }
+
+.cardboard-btn.icon-only.small {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+}
+
+.cardboard-btn.icon-only.small .bi {
+    font-size: 1.2rem;
 }
 
 .modal {
