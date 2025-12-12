@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, url_for
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -7,15 +7,15 @@ app.jinja_env.auto_reload = True
 BACKEND_URL = os.environ.get("BACKEND_URL")
 
 @app.route("/")
-def home():
-    return render_template("home.html")
+def base():
+    return redirect(url_for("home"))
 
 @app.route("/old")
-def home():
+def legacy_dashboard():
     return render_template("index.html", backend_url=BACKEND_URL)
 
-@app.route("/landing")
-def landing():
+@app.route("/home")
+def home():
     return render_template("home.html")
 
 @app.route("/portfolio")
