@@ -60,16 +60,26 @@ function setButtons(inPortfolio) {
     const buy = document.getElementById("buy-btn");
     const update = document.getElementById("update-btn");
     const sell = document.getElementById("sell-btn");
+    const estimate = document.getElementById("sell-all-estimate");
     if (!buy || !update || !sell) return;
 
     if (inPortfolio) {
         buy.classList.add("hidden");
         update.classList.remove("hidden");
         sell.classList.remove("hidden");
+        if (estimate) {
+            const proceeds = currentShares * currentQuotePrice;
+            estimate.textContent = `Sell all proceeds: ${formatCurrency(proceeds)}`;
+            estimate.classList.add("sell-estimate");
+        }
     } else {
         buy.classList.remove("hidden");
         update.classList.add("hidden");
         sell.classList.add("hidden");
+        if (estimate) {
+            estimate.textContent = "";
+            estimate.classList.remove("sell-estimate");
+        }
     }
 }
 
@@ -323,6 +333,8 @@ function wireUpdateModal() {
             valueEl.textContent = `${netToBalance >= 0 ? "+" : ""}${formatCurrency(netToBalance)}`;
             valueEl.classList.toggle("up", netToBalance > 0);
             valueEl.classList.toggle("down", netToBalance < 0);
+            valueEl.classList.toggle("value-impact-up", netToBalance > 0);
+            valueEl.classList.toggle("value-impact-down", netToBalance < 0);
         }
         if (balanceEl) balanceEl.textContent = formatCurrency(resultingBalance);
         positionFollow();

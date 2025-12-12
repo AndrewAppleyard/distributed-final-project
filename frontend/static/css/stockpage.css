@@ -105,6 +105,12 @@
     margin-top: 0.6rem;
 }
 
+.actions-card .sell-estimate {
+    margin-top: 0.5rem;
+    font-weight: bold;
+    color: #0f9d58;
+}
+
 .cardboard-btn {
     background: #f0d9b8;
     border: 2px dashed #8a6d4e;
@@ -311,6 +317,14 @@
 .slider-readout.tight {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     margin-top: 0.2rem;
+}
+
+.value-impact-up {
+    color: #1b5e20;
+}
+
+.value-impact-down {
+    color: #c0392b;
 }
 
 .alert-banner {
