@@ -2,7 +2,7 @@ import os
 import threading
 import time
 from datetime import datetime
-from typing import Optional, Dict
+from typing import Optional, Dict, Set
 
 import requests
 from fastapi import FastAPI, HTTPException
@@ -23,7 +23,11 @@ SPARK_MASTER_URL = os.environ.get("SPARK_MASTER_URL", "spark://spark-master:7077
 API_URL = os.environ.get("API_URL", "http://finnhub-client:8001/quote")
 
 spark = (
-    SparkSession.builder.appName("StockCRUD").master(SPARK_MASTER_URL).getOrCreate()
+    SparkSession.builder.appName("StockCRUD")
+    .master(SPARK_MASTER_URL)
+    .config("spark.driver.bindAddress", "0.0.0.0")
+    .config("spark.driver.host", "backend")
+    .getOrCreate()
 )
 
 portfolio_schema = StructType(
@@ -46,6 +50,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 price_cache: Dict[str, Optional[float]] = {}
+symbol_set: Set[str] = set()
 cache_lock = threading.Lock()
 
 
@@ -85,14 +90,11 @@ def get_cached_price(symbol: str) -> Optional[float]:
 
 
 def update_price_cache():
-    """Background loop to refresh prices for current portfolio symbols."""
+    """Background loop to refresh prices for current portfolio symbols without Spark jobs."""
     while True:
         try:
-            symbols = [
-                row.symbol
-                for row in portfolio.select("symbol").distinct().collect()
-                if row.symbol
-            ]
+            with cache_lock:
+                symbols = list(symbol_set)
             for sym in symbols:
                 latest = fetch_quote(sym)
                 with cache_lock:
@@ -139,6 +141,7 @@ def create_trade(trade: TradeCreate):
     portfolio = portfolio.union(new_df)
     with cache_lock:
         price_cache.pop(trade.symbol, None)
+        symbol_set.add(trade.symbol)
     return {"status": "created", "trade": trade.dict(), "timestamp": buy_time}
 
 
@@ -161,6 +164,7 @@ def update_trade(symbol: str, payload: TradeUpdate):
 
     with cache_lock:
         price_cache.pop(symbol, None)
+        symbol_set.add(symbol)
 
     return {
         "status": "updated",
@@ -198,6 +202,7 @@ def delete_trade(symbol: str, payload: Optional[TradeSell] = None):
     portfolio = portfolio.filter(col("symbol") != symbol)
     with cache_lock:
         price_cache.pop(symbol, None)
+        symbol_set.discard(symbol)
 
     return {
         "status": "deleted",

@@ -23,6 +23,8 @@ services:
       - SPARK_NO_DAEMONIZE=true
       - PYSPARK_PYTHON=python3
       - PYSPARK_DRIVER_PYTHON=python3
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=2g
     ports:
       - "8081:8081"
     networks:
@@ -38,6 +40,8 @@ services:
       - SPARK_NO_DAEMONIZE=true
       - PYSPARK_PYTHON=python3
       - PYSPARK_DRIVER_PYTHON=python3
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=2g
     ports:
       - "8082:8082"
     networks:
@@ -64,7 +68,7 @@ services:
     build: ./frontend
     container_name: frontend
     environment:
-      - BACKEND_URL=${BACKEND_URL:-http://localhost:4000}
+      - BACKEND_URL=${BACKEND_URL:-}
     ports:
       - "8800:8800"
     networks:
