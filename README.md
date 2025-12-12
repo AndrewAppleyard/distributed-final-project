@@ -1,43 +1,62 @@
 # Trading Analysis Pipeline (Docker + Spark)
 
-This repo contains a lightweight Spark cluster and a small set of services for experimenting with market data, including a Finnhub-backed FastAPI service and a demo backend/frontend.
+This project runs a small Spark cluster plus three app services:
+- **backend** – FastAPI CRUD + quote caching, talks to Spark and InfluxDB, port `4000`.
+- **finnhub-client** – Lightweight FastAPI proxy to Finnhub quotes, port `8001`.
+- **frontend** – Serves a single page that embeds the Grafana dashboard, port `8800`.
+- **Observability** – InfluxDB (`8086`) for time-series storage and Grafana (`3000`) with pre-provisioned datasource + dashboard.
+- **Spark** – master (`7077`, UI `8080`) and two workers (UIs `8081`, `8082`) sharing volumes.
 
+## Prerequisites
+- Docker + Docker Compose installed.
+- Create a root `.env` with at least:
+  - `FINNHUB_API_KEY`
+  - `INFLUXDB_TOKEN`, `INFLUXDB_USERNAME`, `INFLUXDB_PASSWORD`, `INFLUXDB_ORG`, `INFLUXDB_BUCKET`
+  - Optional: `GRAFANA_USER`, `GRAFANA_PASSWORD` (defaults to admin/admin), `GRAFANA_URL` for the embed, `PRICE_SYMBOLS`, `PRICE_POLL_INTERVAL`.
+- Free ports: 3000, 4000, 7077, 8001, 8080, 8081, 8082, 8086, 8800, 35000, 35001.
 
-## Finnhub FastAPI Service
-`api/api.py` exposes a FastAPI app that fetches quotes from Finnhub.
+## How to Run (Compose)
+- Start everything: `docker compose up --build`
+- Stop: `docker compose down`
+- Rebuild one service (example backend): `docker compose build backend`
+- Backend Swagger UI: `http://localhost:4000/docs`
+- Frontend (Grafana embed): `http://localhost:8800`
+- Grafana UI: `http://localhost:3000` (defaults admin/admin unless overridden).
 
-Environment variables:
-- `FINNHUB_API_KEY` (required) – your Finnhub key.
-- `STOCK_SYMBOL` (optional) – default symbol when hitting `/quote`; defaults to `NVDA`.
+## Optional: Docker Swarm
+- Init: `sudo docker swarm init --advertise-addr <your-ip>`
+- Deploy: `sudo --preserve-env docker stack deploy -c docker-stack.prod.yaml distributed`
+- Inspect: `sudo docker stack services distributed` (or `sudo docker service ls`)
+- Logs: `sudo docker service logs -f <service_name>`
+- Remove: `sudo docker stack rm distributed`; leave swarm: `sudo docker swarm leave --force`
+- Helper script loads `.env` then deploys: `sudo ./scripts/deploy_prod.sh`
 
-Build and run:
-- `FINNHUB_API_KEY=... docker compose up --build finnhub-client`
+## Backend API (FastAPI on :4000)
+- `GET /health` – liveness
+- `GET /portfolio` – list all trades
+- `GET /balance` – current simulated cash
+- `POST /trades` – create (body e.g. `{"symbol":"AAPL","shares":5,"buy_price":180}`)
+- `PUT /trades/{symbol}` – adjust price/shares (e.g. `{"new_price":185,"delta_shares":1,"current_price":190}`)
+- `DELETE /trades/{symbol}` – delete/sell; optional `{"sale_price":190}` to credit balance and compute net gain
+- `GET /quote/{symbol}` – fetch latest quote via finnhub-client; returns 502 if upstream fails
+- `GET /cache` – view in-memory price cache (refreshed every 5s for tracked symbols; re-populates after trades are created/updated)
+- Price polling: when `PRICE_SYMBOLS` and `INFLUXDB_TOKEN` are set, the backend polls those symbols every `PRICE_POLL_INTERVAL` seconds and writes to InfluxDB (`prices` measurement).
 
-Endpoints (served on port `8001` by default):
-- `GET /health` — simple health check.
-- `GET /quote` — returns the default symbol’s quote (uses `STOCK_SYMBOL` or `NVDA`).
-- `GET /quote/{symbol}` — returns the latest quote for the provided symbol (e.g., `/quote/AAPL`).
+## Finnhub Client (FastAPI on :8001)
+- `GET /health` – service health
+- `GET /quote` – default symbol from `STOCK_SYMBOL` (defaults to NVDA)
+- `GET /quote/{symbol}` – quote for specific symbol
+- Requires `FINNHUB_API_KEY`.
 
-Example curl:
-- `curl http://localhost:8001/quote/AAPL`
+## Frontend
+- Serves a minimal page that embeds Grafana. Configure `GRAFANA_URL` (defaults to `http://localhost:3000/d/af6vza09jsbggd`) to point to your Grafana dashboard URL.
 
-Output is a JSON payload with the latest quote fields returned by Finnhub.
+## Grafana & InfluxDB
+- Datasource is provisioned at startup with UID `af6w3lxl7pnuoa`, pointing to InfluxDB at `http://influxdb:8086`, using env `INFLUXDB_ORG`, `INFLUXDB_BUCKET`, and `INFLUXDB_TOKEN`.
+- Dashboard JSON `grafana/dashboards/stock_candles.json` is preloaded with UID `af6vza09jsbggd`. If you change UIDs, update both the datasource file and dashboard JSON.
+- InfluxDB admin is initialized from `.env` values; ensure the token meets InfluxDB length rules (8–72 chars).
 
-## Backend Trading API (FastAPI)
-`backend/app.py` exposes a Spark-backed FastAPI service for mock trades.
-
-Build and run:
-- `docker compose up --build backend` (backend listens on port `4000`)
-- Swagger UI: `http://localhost:4000/docs`
-
-Endpoints:
-- `GET /health` — health check.
-- `GET /portfolio` — list all trades (JSON array).
-- `POST /trades` — create a trade. Body: `{"symbol":"AAPL","shares":10,"buy_price":150.5}`.
-- `PUT /trades/{symbol}` — update buy price. Body: `{"new_price":155.0}` (404 if symbol not present).
-- `DELETE /trades/{symbol}` — delete/sell a trade; returns net gain if quote available.
-
-Examples:
-- Create: `curl -X POST http://localhost:4000/trades -H "Content-Type: application/json" -d '{"symbol":"AAPL","shares":5,"buy_price":180}'`
-- Update: `curl -X PUT http://localhost:4000/trades/AAPL -H "Content-Type: application/json" -d '{"new_price":185}'`
-- Delete: `curl -X DELETE http://localhost:4000/trades/AAPL`
+## Spark Notes
+- Master URL: `spark://spark-master:7077`
+- Workers (compose) are capped at `SPARK_WORKER_CORES=2`, `SPARK_WORKER_MEMORY=2g`.
+- Backend submits Spark jobs using `SparkSession.builder.master("spark://spark-master:7077")` with driver ports 35000/35001 exposed in compose/stack.

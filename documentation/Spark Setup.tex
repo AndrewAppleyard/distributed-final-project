@@ -8,7 +8,7 @@
 \usepackage{listings}
 \usepackage{xcolor}
 \usepackage{pgfplots}
-\usepackage[letterpaper, margin=1.25in]{geometry}
+\usepackage[letterpaper, margin=2in]{geometry}
 \usepackage{titlesec}
 \usepackage{fancyhdr}
 \usetikzlibrary{trees}
@@ -55,8 +55,14 @@
     \item \texttt{INFLUXDB\_PASSWORD=}
     \item \texttt{INFLUXDB\_ORG=}
     \item \texttt{INFLUXDB\_BUCKET=}
+    \item \texttt{GRAFANA\_USER=}
+    \item \texttt{GRAFANA\_PASSWORD=}
   \end{itemize}
-  \item Ensure ports 4000, 7077, 8001, 8080, 8081, 8082, 8086, 8800 are free.
+  \item Ensure these ports are free:
+  \begin{itemize}[leftmargin=*]
+    \item 3000, 4000, 7077, 8001, 8080, 8081
+    \item 8082, 8086, 8800, 35000, 35001
+  \end{itemize}
 \end{enumerate}
 
 \subsection*{Run the Containers (Exact Commands)}
@@ -70,8 +76,9 @@
     \item Init swarm: \texttt{sudo docker swarm init --advertise-addr <your-ip>}
     \item Check status: \texttt{sudo docker info | grep -A3 "Swarm"}
     \item List nodes: \texttt{sudo docker node ls}
-    \item Deploy stack: \texttt{sudo docker stack deploy -c docker-stack.prod.yaml distributed}
-    \item List services: \texttt{sudo docker stack services distributed} (or \texttt{sudo docker service ls})
+    \item Deploy stack: \texttt{sudo ./scripts/deploy\_prod.sh}
+    \item List services: \texttt{sudo docker stack services distributed}
+    \item Same as above: \texttt{sudo docker service ls}
     \item Inspect service: \texttt{sudo docker service ps <service\_name>} and logs: \texttt{sudo docker service logs -f <service\_name>}
     \item Remove stack: \texttt{sudo docker stack rm distributed}
     \item Leave swarm: \texttt{sudo docker swarm leave --force} (re-run init after leaving)
@@ -81,14 +88,17 @@
 \subsection*{Run the CRUD Application}
 \begin{itemize}[leftmargin=*]
   \item Backend FastAPI: \texttt{http://localhost:4000} (Swagger UI at \texttt{/docs}).
-  \item Frontend dashboard: \texttt{http://localhost:8800}.
+  \item Frontend dashboard: \texttt{http://localhost:8800} (renders Grafana embed).
   \item Key endpoints:
   \begin{itemize}[leftmargin=*]
     \item \texttt{GET /portfolio} --- list all trades.
-    \item \texttt{POST /trades} --- create (e.g., \texttt{\{"symbol":"AAPL","shares":5,"buy\_price":180\}}).
-    \item \texttt{PUT /trades/\{symbol\}} --- update buy price (e.g., \texttt{\{"new\_price":185\}}).
-    \item \texttt{DELETE /trades/\{symbol\}} --- delete/sell a trade; optional body \texttt{\{"sale\_price":190\}} to compute net gain.
-    \item \texttt{GET /cache} --- view in-memory price cache (refreshed every 5s for tracked symbols).
+    \item \texttt{GET /balance} --- show simulated cash balance.
+    \item \texttt{POST /trades} --- create; debits balance (e.g. \verb|{"symbol":"AAPL","shares":5,"buy_price":180}|).
+    \item \texttt{PUT /trades/\{symbol\}} --- update price/shares; adjusts balance (e.g. \verb|{"new_price":185,"delta_shares":1,"current_price":190}|).
+    \item \texttt{DELETE /trades/\{symbol\}} --- delete/sell; optional body \verb|{"sale_price":190}| to compute net gain and credit balance.
+    \item \texttt{GET /cache} --- inspect in-memory price cache (refreshed every 5s for tracked symbols; re-populates after trades are created/updated).
+    \item \texttt{GET /quote/\{symbol\}} --- fetch latest quote via finnhub client; 502 if upstream fails.
+    \item Price polling (optional): polls \texttt{PRICE\_SYMBOLS} every \texttt{PRICE\_POLL\_INTERVAL} seconds and writes to Influx \texttt{prices} when \texttt{INFLUXDB\_TOKEN} is set.
   \end{itemize}
   \item Finnhub quote API: \texttt{http://localhost:8001/quote/\{symbol\}} (uses \texttt{FINNHUB\_API\_KEY}).
   \item Grafana (optional dashboards): \texttt{http://localhost:3000}.

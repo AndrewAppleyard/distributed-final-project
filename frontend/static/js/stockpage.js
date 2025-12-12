@@ -5,6 +5,8 @@ let currentQuotePrice = 0;
 let currentBalance = null;
 let currentShares = 0;
 let loaderInterval = null;
+let currentBuyPrice = 0;
+let inPortfolio = false;
 
 function startLoader() {
     const overlay = document.getElementById("loader-overlay");
@@ -56,7 +58,7 @@ async function loadStockQuote() {
     const timeEl = document.getElementById("quote-time");
 
     try {
-        const res = await fetch(`${backendBase}/quote/${encodeURIComponent(symbol)}`);
+        const res = await fetch(`${backendBase}/quote/${encodeURIComponent(symbol)}?force=true`);
         if (!res.ok) throw new Error(`Quote lookup failed (${res.status})`);
         const data = await res.json();
 
@@ -69,7 +71,16 @@ async function loadStockQuote() {
         changeEl.textContent = `${formatPercent(pct)} (${formatCurrency(change)})`;
         changeEl.classList.toggle("up", change >= 0);
         changeEl.classList.toggle("down", change < 0);
-        timeEl.textContent = data.timestamp ? `As of ${formatDateTime(Number(data.timestamp))}` : "";
+        const ts = Number(data.timestamp || 0);
+        const fetched = Number(data.fetched_at || 0);
+        const displayTs = ts || fetched;
+        timeEl.textContent = displayTs ? `Quote time: ${formatDateTime(displayTs)}` : "";
+        const fetchedEl = document.getElementById("quote-fetched");
+        if (fetchedEl) {
+            fetchedEl.textContent = fetched
+                ? `Fetched at: ${formatDateTime(fetched)}`
+                : "";
+        }
 
         const mapField = (id, val) => {
             const el = document.getElementById(id);
@@ -80,6 +91,7 @@ async function loadStockQuote() {
         mapField("quote-prev", data.prev_close ?? data.prevClose ?? 0);
         mapField("quote-high", data.high ?? 0);
         mapField("quote-low", data.low ?? 0);
+        setButtons(inPortfolio);
     } catch (err) {
         priceEl.textContent = "N/A";
         changeEl.textContent = "Unavailable";
@@ -99,9 +111,11 @@ function setButtons(inPortfolio) {
         update.classList.remove("hidden");
         sell.classList.remove("hidden");
         if (estimate) {
-            const proceeds = currentShares * currentQuotePrice;
-            estimate.textContent = `Sell all proceeds: ${formatCurrency(proceeds)}`;
+            const netGain = currentShares * (currentQuotePrice - currentBuyPrice);
+            estimate.textContent = `Net gain: ${netGain >= 0 ? "+" : ""}${formatCurrency(netGain)}`;
             estimate.classList.add("sell-estimate");
+            estimate.classList.toggle("pl-positive", netGain > 0);
+            estimate.classList.toggle("pl-negative", netGain < 0);
         }
     } else {
         buy.classList.remove("hidden");
@@ -110,6 +124,8 @@ function setButtons(inPortfolio) {
         if (estimate) {
             estimate.textContent = "";
             estimate.classList.remove("sell-estimate");
+            estimate.classList.remove("pl-positive");
+            estimate.classList.remove("pl-negative");
         }
     }
 }
@@ -125,8 +141,9 @@ async function loadPortfolioStatus() {
         const data = await res.json();
         const match =
             Array.isArray(data) && data.find((row) => (row.symbol || "").toUpperCase() === symbol);
-        const inPortfolio = Boolean(match);
+        inPortfolio = Boolean(match);
         currentShares = match ? Number(match.shares || 0) : 0;
+        currentBuyPrice = match ? Number(match.buy_price || 0) : 0;
         setButtons(inPortfolio);
     } catch (err) {
         // default to buy-only if portfolio check fails
@@ -153,6 +170,12 @@ document.addEventListener("DOMContentLoaded", () => {
     setInterval(loadStockQuote, 5000);
     loadPortfolioStatus();
     loadBalance();
+    const balRefresh = document.getElementById("balance-refresh");
+    if (balRefresh) {
+        balRefresh.addEventListener("click", () => {
+            window.location.reload();
+        });
+    }
 });
 
 function openBuyModal() {

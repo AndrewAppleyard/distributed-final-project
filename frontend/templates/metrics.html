@@ -12,26 +12,28 @@
         <div>
             <p class="eyebrow">Account Pulse</p>
             <h1>Metrics</h1>
-            <p class="lede">Gauge how your paper trades are trending with quick stats, simple visuals, and a cozy cardboard vibe.</p>
+            <p class="lede">Track equity, balance, and a simple drift line for your paper trades.</p>
         </div>
-        <button class="cardboard-btn" id="refresh-metrics">Refresh metrics</button>
+        <button class="cardboard-btn icon-only" id="refresh-metrics" aria-label="Refresh metrics">
+            <i class="bi bi-arrow-counterclockwise"></i>
+        </button>
     </div>
 
-    <div class="card stat-row">
-        <div class="stat-block">
-            <p class="label">Return (YTD)</p>
-            <h2 id="metric-return">--</h2>
-            <p class="muted" id="metric-return-note">Pending update.</p>
+    <div class="stat-grid">
+        <div class="card stat-card">
+            <p class="label">Total equity</p>
+            <h2 id="stat-equity">$0</h2>
+            <p class="muted" id="stat-change">Move: --</p>
         </div>
-        <div class="stat-block">
-            <p class="label">Win rate</p>
-            <h2 id="metric-winrate">--</h2>
-            <p class="muted">Closed trades finishing green.</p>
+        <div class="card stat-card">
+            <p class="label">Available cash</p>
+            <h2 id="stat-cash">$0</h2>
+            <p class="muted">Balance for the next buy.</p>
         </div>
-        <div class="stat-block">
-            <p class="label">Avg holding</p>
-            <h2 id="metric-hold">--</h2>
-            <p class="muted">Time in position.</p>
+        <div class="card stat-card">
+            <p class="label">Positions</p>
+            <h2 id="stat-positions">0</h2>
+            <p class="muted">Active holdings</p>
         </div>
     </div>
 
@@ -41,19 +43,43 @@
                 <p class="eyebrow">Balance Curve</p>
                 <h3>Equity drift</h3>
             </div>
-            <span class="tag">Scribbled</span>
+            <button class="cardboard-btn icon-only small" id="sell-all" aria-label="Sell all holdings">
+                <i class="bi bi-trash"></i>
+            </button>
         </div>
-        <div id="performance-bars" class="spark-grid"></div>
+        <div class="chart-wrap">
+            <div class="y-axis">
+                <span id="y-max">--</span>
+                <span id="y-mid">--</span>
+                <span id="y-min">--</span>
+            </div>
+            <div class="chart-area">
+                <svg id="equity-chart" class="equity-chart" viewBox="0 0 100 50" preserveAspectRatio="none"></svg>
+                <div class="x-axis">
+                    <span id="x-start">Start</span>
+                    <span id="x-end">Latest</span>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="metrics-grid">
-        <div class="card">
-            <h3>Risk + stability</h3>
-            <div id="risk-list" class="pill-list"></div>
-        </div>
-        <div class="card">
-            <h3>Highlights</h3>
-            <ul id="metric-list" class="bullet-list"></ul>
+    <div class="card highlights-card">
+        <h3>Highlights</h3>
+        <ul id="highlight-list" class="bullet-list">
+            <li>Equity points log locally; refreshing won’t add a new point.</li>
+            <li>Equity samples every 10s; chart redraws every 20s.</li>
+            <li>Click a holding in Portfolio to manage positions.</li>
+        </ul>
+    </div>
+</div>
+
+<div id="sell-modal" class="metrics-modal hidden">
+    <div class="metrics-modal-content">
+        <h3>Sell all holdings?</h3>
+        <p class="muted">Are you sure you want to liquidate every position?</p>
+        <div class="modal-actions">
+            <button class="cardboard-btn ghost" id="sell-cancel">Cancel</button>
+            <button class="cardboard-btn danger" id="sell-confirm">Yes, sell all</button>
         </div>
     </div>
 </div>

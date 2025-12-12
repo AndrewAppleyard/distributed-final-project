@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.12.8)  12 DEC 2025 09:49
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.12.8)  12 DEC 2025 13:32
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -921,15 +921,15 @@ your preamble.
 * layout: <same size as paper>
 * layoutoffset:(h,v)=(0.0pt,0.0pt)
 * modes: 
-* h-part:(L,W,R)=(90.3375pt, 433.62001pt, 90.3375pt)
-* v-part:(T,H,B)=(90.3375pt, 614.295pt, 90.3375pt)
+* h-part:(L,W,R)=(144.54pt, 325.21501pt, 144.54pt)
+* v-part:(T,H,B)=(144.54pt, 505.89pt, 144.54pt)
 * \paperwidth=614.295pt
 * \paperheight=794.96999pt
-* \textwidth=433.62001pt
-* \textheight=614.295pt
-* \oddsidemargin=18.0675pt
-* \evensidemargin=18.0675pt
-* \topmargin=-18.9325pt
+* \textwidth=325.21501pt
+* \textheight=505.89pt
+* \oddsidemargin=72.27pt
+* \evensidemargin=72.27pt
+* \topmargin=35.27pt
 * \headheight=12.0pt
 * \headsep=25.0pt
 * \topskip=10.0pt
@@ -984,25 +984,9 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) [1
 
 {/home/abraham/.miktex/texmfs/data/fonts/map/pdftex/pdftex.map}]
-Overfull \hbox (31.03094pt too wide) in paragraph at lines 67--68
-[]\OT1/cmr/m/n/10 Spark services: master + two workers come up via compose; wor
-kers are limited to \OT1/cmtt/m/n/10 SPARK[]WORKER[]CORES=2
- []
-
-LaTeX Font Info:    Trying to load font information for OMS+cmtt on input line 
-88.
-LaTeX Font Info:    No file OMScmtt.fd. on input line 88.
-
-LaTeX Font Warning: Font shape `OMS/cmtt/m/n' undefined
-(Font)              using `OMS/cmsy/m/n' instead
-(Font)              for symbol `textbraceleft' on input line 88.
-
-
-Overfull \hbox (9.11118pt too wide) in paragraph at lines 90--91
-[]\OT1/cmtt/m/n/10 DELETE /trades/\OMS/cmtt/m/n/10 f\OT1/cmtt/m/n/10 symbol\OMS
-/cmtt/m/n/10 g \OT1/cmr/m/n/10 --- delete/sell a trade; optional body \OMS/cmtt
-/m/n/10 f\OT1/cmtt/m/n/10 "sale[]price":190\OMS/cmtt/m/n/10 g \OT1/cmr/m/n/10 t
-o compute
+Overfull \hbox (5.64268pt too wide) in paragraph at lines 76--77
+[]\OT1/cmr/m/n/10 Init swarm: \OT1/cmtt/m/n/10 sudo docker swarm init --adverti
+se-addr <your-ip> 
  []
 
 
@@ -1010,8 +994,49 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.92   \end{itemize}
-                     [1] [2] (Spark Setup.aux)
+l.83     \item R
+                emove stack: \texttt{sudo docker stack rm distributed} [1]
+Overfull \hbox (1.04709pt too wide) in paragraph at lines 91--92
+[]\OT1/cmr/m/n/10 Frontend dashboard: \OT1/cmtt/m/n/10 http://localhost:8800 \O
+T1/cmr/m/n/10 (renders Grafana embed). 
+ []
+
+
+Overfull \hbox (128.5036pt too wide) in paragraph at lines 96--97
+[]\OT1/cmtt/m/n/10 POST /trades \OT1/cmr/m/n/10 --- create; debits balance (e.g
+. []\OT1/cmtt/m/n/10 {"symbol":"AAPL","shares":5,"buy_price":180}\OT1/cmr/m/n/1
+0 ). 
+ []
+
+LaTeX Font Info:    Trying to load font information for OMS+cmtt on input line 
+97.
+LaTeX Font Info:    No file OMScmtt.fd. on input line 97.
+
+LaTeX Font Warning: Font shape `OMS/cmtt/m/n' undefined
+(Font)              using `OMS/cmsy/m/n' instead
+(Font)              for symbol `textbraceleft' on input line 97.
+
+
+Overfull \hbox (36.54149pt too wide) in paragraph at lines 98--99
+[]\OT1/cmtt/m/n/10 DELETE /trades/\OMS/cmtt/m/n/10 f\OT1/cmtt/m/n/10 symbol\OMS
+/cmtt/m/n/10 g \OT1/cmr/m/n/10 --- delete/sell; optional body []\OT1/cmtt/m/n/1
+0 {"sale_price":190}
+ []
+
+
+Overfull \hbox (15.89925pt too wide) in paragraph at lines 101--102
+[]\OT1/cmr/m/n/10 Price polling (optional): polls \OT1/cmtt/m/n/10 PRICE[]SYMBO
+LS \OT1/cmr/m/n/10 every \OT1/cmtt/m/n/10 PRICE[]POLL[]INTERVAL
+ []
+
+
+Overfull \hbox (70.31398pt too wide) in paragraph at lines 103--104
+[]\OT1/cmr/m/n/10 Finnhub quote API: \OT1/cmtt/m/n/10 http://localhost:8001/quo
+te/\OMS/cmtt/m/n/10 f\OT1/cmtt/m/n/10 symbol\OMS/cmtt/m/n/10 g \OT1/cmr/m/n/10 
+(uses \OT1/cmtt/m/n/10 FINNHUB[]API[]KEY\OT1/cmr/m/n/10 ). 
+ []
+
+[2] [3] (Spark Setup.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-02-20>
@@ -1024,13 +1049,13 @@ Package rerunfilecheck Info: File `"Spark Setup".out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
  ) 
 Here is how much of TeX's memory you used:
- 34025 strings out of 476385
- 778982 string characters out of 5794170
- 1939187 words of memory out of 5000000
+ 34026 strings out of 476385
+ 778988 string characters out of 5794170
+ 1937187 words of memory out of 5000000
  55556 multiletter control sequences out of 15000+600000
  564736 words of font info for 61 fonts, out of 8000000 for 9000
  0 hyphenation exceptions out of 8191
- 99i,11n,101p,760b,694s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 99i,11n,101p,757b,692s stack positions out of 10000i,1000n,20000p,200000b,200000s
  </home/abraham/.miktex/texmfs/data/fonts/pk/ljfour/jknappen/ec/dpi600/tcrm10
 00.pk></home/abraham/.miktex/texmfs/install/fonts/type1/public/amsfonts/cm/cmbx
 10.pfb></home/abraham/.miktex/texmfs/install/fonts/type1/public/amsfonts/cm/cmb
@@ -1040,9 +1065,9 @@ r12.pfb></home/abraham/.miktex/texmfs/install/fonts/type1/public/amsfonts/cm/cm
 r17.pfb></home/abraham/.miktex/texmfs/install/fonts/type1/public/amsfonts/cm/cm
 sy10.pfb></home/abraham/.miktex/texmfs/install/fonts/type1/public/amsfonts/cm/c
 mtt10.pfb>
-Output written on "Spark Setup.pdf" (3 pages, 113152 bytes).
+Output written on "Spark Setup.pdf" (4 pages, 115513 bytes).
 PDF statistics:
- 72 PDF objects out of 1000 (max. 8388607)
- 12 named destinations out of 1000 (max. 500000)
+ 77 PDF objects out of 1000 (max. 8388607)
+ 13 named destinations out of 1000 (max. 500000)
  13 words of extra memory for PDF output out of 10000 (max. 10000000)
 

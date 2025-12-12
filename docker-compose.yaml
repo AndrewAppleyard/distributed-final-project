@@ -119,8 +119,8 @@ services:
     image: grafana/grafana:10.4.1
     container_name: grafana
     environment:
-      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
       - INFLUXDB_ORG=${INFLUXDB_ORG:-trading}
       - INFLUXDB_BUCKET=${INFLUXDB_BUCKET:-market_data}
       - INFLUXDB_TOKEN=${INFLUXDB_TOKEN:-local-token}
