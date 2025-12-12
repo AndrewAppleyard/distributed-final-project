@@ -2,11 +2,7 @@ import os
 import threading
 import time
 from datetime import datetime
-<<<<<<< HEAD
-from typing import Optional, Dict, Set
-=======
 from typing import Optional, List, Dict, Optional as Opt
->>>>>>> 28209f9bcdb59378d695ac610fe51171e66ae47c
 
 import base64
 import requests
