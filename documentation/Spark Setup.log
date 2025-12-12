@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.12.8)  11 DEC 2025 22:38
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.12.8)  12 DEC 2025 09:49
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -990,15 +990,15 @@ kers are limited to \OT1/cmtt/m/n/10 SPARK[]WORKER[]CORES=2
  []
 
 LaTeX Font Info:    Trying to load font information for OMS+cmtt on input line 
-77.
-LaTeX Font Info:    No file OMScmtt.fd. on input line 77.
+88.
+LaTeX Font Info:    No file OMScmtt.fd. on input line 88.
 
 LaTeX Font Warning: Font shape `OMS/cmtt/m/n' undefined
 (Font)              using `OMS/cmsy/m/n' instead
-(Font)              for symbol `textbraceleft' on input line 77.
+(Font)              for symbol `textbraceleft' on input line 88.
 
 
-Overfull \hbox (9.11118pt too wide) in paragraph at lines 79--80
+Overfull \hbox (9.11118pt too wide) in paragraph at lines 90--91
 []\OT1/cmtt/m/n/10 DELETE /trades/\OMS/cmtt/m/n/10 f\OT1/cmtt/m/n/10 symbol\OMS
 /cmtt/m/n/10 g \OT1/cmr/m/n/10 --- delete/sell a trade; optional body \OMS/cmtt
 /m/n/10 f\OT1/cmtt/m/n/10 "sale[]price":190\OMS/cmtt/m/n/10 g \OT1/cmr/m/n/10 t
@@ -1010,8 +1010,8 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.94 \end{verbatim}
-                    [1] [2] (Spark Setup.aux)
+l.92   \end{itemize}
+                     [1] [2] (Spark Setup.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-02-20>
@@ -1026,11 +1026,11 @@ Package rerunfilecheck Info: File `"Spark Setup".out' has not changed.
 Here is how much of TeX's memory you used:
  34025 strings out of 476385
  778982 string characters out of 5794170
- 1938187 words of memory out of 5000000
+ 1939187 words of memory out of 5000000
  55556 multiletter control sequences out of 15000+600000
  564736 words of font info for 61 fonts, out of 8000000 for 9000
  0 hyphenation exceptions out of 8191
- 99i,11n,101p,760b,763s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 99i,11n,101p,760b,694s stack positions out of 10000i,1000n,20000p,200000b,200000s
  </home/abraham/.miktex/texmfs/data/fonts/pk/ljfour/jknappen/ec/dpi600/tcrm10
 00.pk></home/abraham/.miktex/texmfs/install/fonts/type1/public/amsfonts/cm/cmbx
 10.pfb></home/abraham/.miktex/texmfs/install/fonts/type1/public/amsfonts/cm/cmb
@@ -1040,7 +1040,7 @@ r12.pfb></home/abraham/.miktex/texmfs/install/fonts/type1/public/amsfonts/cm/cm
 r17.pfb></home/abraham/.miktex/texmfs/install/fonts/type1/public/amsfonts/cm/cm
 sy10.pfb></home/abraham/.miktex/texmfs/install/fonts/type1/public/amsfonts/cm/c
 mtt10.pfb>
-Output written on "Spark Setup.pdf" (3 pages, 112121 bytes).
+Output written on "Spark Setup.pdf" (3 pages, 113152 bytes).
 PDF statistics:
  72 PDF objects out of 1000 (max. 8388607)
  12 named destinations out of 1000 (max. 500000)

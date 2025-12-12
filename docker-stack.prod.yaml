@@ -42,6 +42,8 @@ services:
       - SPARK_NO_DAEMONIZE=true
       - PYSPARK_PYTHON=python3
       - PYSPARK_DRIVER_PYTHON=python3
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=2g
     networks:
       - sparknet
     deploy:
@@ -52,18 +54,22 @@ services:
   backend:
     image: distributed-backend:latest
     environment:
-      - API_URL=${API_URL:-http://finnhub-client:8001/quote}
-      - INFLUXDB_URL=${INFLUXDB_URL:-http://influxdb:8086}
-      - INFLUXDB_TOKEN=${INFLUXDB_ADMIN_TOKEN:-local-token}
-      - INFLUXDB_ORG=${INFLUXDB_ORG:-trading}
-      - INFLUXDB_BUCKET=${INFLUXDB_BUCKET:-market_data}
+      - API_URL=http://finnhub-client:8001/quote
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_TOKEN=${INFLUXDB_TOKEN}
+      - INFLUXDB_ORG=${INFLUXDB_ORG}
+      - INFLUXDB_BUCKET=${INFLUXDB_BUCKET}
+      - PYSPARK_PYTHON=python3
+      - PYSPARK_DRIVER_PYTHON=python3
     ports:
       - "4000:4000"
+      - "35000:35000"
+      - "35001:35001"
     networks:
       - sparknet
       - stock_api
     deploy:
-      replicas: 2
+      replicas: 1
       restart_policy:
         condition: on-failure
 
@@ -72,7 +78,7 @@ services:
     ports:
       - "8800:8800"
     environment:
-      - BACKEND_URL=${BACKEND_URL:-http://localhost:4000}
+      - BACKEND_URL=
     networks:
       - stock_api
     deploy:
@@ -86,7 +92,7 @@ services:
       - "8001:8001"
     environment:
       - FINNHUB_API_KEY=${FINNHUB_API_KEY}
-      - STOCK_SYMBOL=${STOCK_SYMBOL:-NVDA}
+      - STOCK_SYMBOL=${STOCK_SYMBOL}
     networks:
       - stock_api
     deploy:
@@ -98,11 +104,11 @@ services:
     image: influxdb:2.7
     environment:
       - DOCKER_INFLUXDB_INIT_MODE=setup
-      - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUXDB_USERNAME:-admin}
-      - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUXDB_PASSWORD:-password}
-      - DOCKER_INFLUXDB_INIT_ORG=${INFLUXDB_ORG:-trading}
-      - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUXDB_BUCKET:-market_data}
-      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUXDB_ADMIN_TOKEN:-local-token}
+      - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUXDB_USERNAME}
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUXDB_PASSWORD}
+      - DOCKER_INFLUXDB_INIT_ORG=${INFLUXDB_ORG}
+      - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUXDB_BUCKET}
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUXDB_ADMIN_TOKEN}
     ports:
       - "8086:8086"
     networks:

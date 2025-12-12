@@ -26,12 +26,16 @@ API_URL = os.environ.get("API_URL", "http://finnhub-client:8001/quote")
 START_BALANCE = float(os.environ.get("START_BALANCE", 3000))
 
 spark = (
-    SparkSession.builder.appName("StockCRUD")
-    .master(SPARK_MASTER_URL)
+    SparkSession.builder
+    .appName("StockCRUD")
+    .master("spark://spark-master:7077")
     .config("spark.driver.bindAddress", "0.0.0.0")
     .config("spark.driver.host", "backend")
+    .config("spark.driver.port", "35000")
+    .config("spark.blockManager.port", "35001")
     .getOrCreate()
 )
+
 
 portfolio_schema = StructType(
     [

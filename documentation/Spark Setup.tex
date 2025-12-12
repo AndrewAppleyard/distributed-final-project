@@ -65,6 +65,17 @@
   \item Stop: \texttt{docker compose down}
   \item Rebuild a single service (example backend): \texttt{docker compose build backend}
   \item Spark services: master + two workers come up via compose; workers are limited to \texttt{SPARK\_WORKER\_CORES=2} and \texttt{SPARK\_WORKER\_MEMORY=2g}.
+  \item Docker Swarm (optional deployment):
+  \begin{itemize}[leftmargin=*]
+    \item Init swarm: \texttt{sudo docker swarm init --advertise-addr <your-ip>}
+    \item Check status: \texttt{sudo docker info | grep -A3 "Swarm"}
+    \item List nodes: \texttt{sudo docker node ls}
+    \item Deploy stack: \texttt{sudo docker stack deploy -c docker-stack.prod.yaml distributed}
+    \item List services: \texttt{sudo docker stack services distributed} (or \texttt{sudo docker service ls})
+    \item Inspect service: \texttt{sudo docker service ps <service\_name>} and logs: \texttt{sudo docker service logs -f <service\_name>}
+    \item Remove stack: \texttt{sudo docker stack rm distributed}
+    \item Leave swarm: \texttt{sudo docker swarm leave --force} (re-run init after leaving)
+  \end{itemize}
 \end{itemize}
 
 \subsection*{Run the CRUD Application}
