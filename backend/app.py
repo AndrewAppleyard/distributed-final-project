@@ -4,6 +4,7 @@ from typing import Optional
 
 import requests
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, validator
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, when
@@ -35,6 +36,13 @@ portfolio_schema = StructType(
 portfolio = spark.createDataFrame([], schema=portfolio_schema)
 
 app = FastAPI(title="Backend", version="0.2.0")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class TradeCreate(BaseModel):

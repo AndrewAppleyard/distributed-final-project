@@ -43,9 +43,13 @@ services:
     build: ./frontend
     container_name: frontend
     environment:
-      - BACKEND_URL=${BACKEND_URL:-}
+      - BACKEND_URL=${BACKEND_URL:-http://localhost:4000}
     ports:
       - "8800:8800"
+    networks:
+      - stock_api
+    volumes:
+      - ./frontend:/app
 
   finnhub-client:
     build:
