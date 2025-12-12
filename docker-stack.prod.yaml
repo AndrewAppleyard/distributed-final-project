@@ -1,28 +1,11 @@
 version: "3.8"
 
 services:
-  # Zookeeper for future proofing adding another master, election system
-  zookeeper:
-    image: zookeeper:3.9
-    environment:
-      - ALLOW_ANONYMOUS_LOGIN=yes
-    ports:
-      - "2181:2181"
-    networks:
-      - sparknet
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-
   spark-master:
     image: apache/spark:3.5.6
     command: ["/opt/spark/sbin/start-master.sh"]
     environment:
       - SPARK_NO_DAEMONIZE=true
-      - SPARK_DAEMON_JAVA_OPTS=-Dspark.deploy.recoveryMode=ZOOKEEPER -Dspark.deploy.zookeeper.url=zookeeper:2181 -Dspark.deploy.zookeeper.dir=/spark-ha
-      - PYSPARK_PYTHON=python3
-      - PYSPARK_DRIVER_PYTHON=python3
     ports:
       - "7077:7077"
       - "8080:8080"
@@ -50,17 +33,18 @@ services:
       replicas: 2
       restart_policy:
         condition: on-failure
+    ports:
+      - "8081:8081"
 
   backend:
     image: distributed-backend:latest
     environment:
-      - API_URL=http://finnhub-client:8001/quote
-      - INFLUXDB_URL=http://influxdb:8086
-      - INFLUXDB_TOKEN=${INFLUXDB_TOKEN}
-      - INFLUXDB_ORG=${INFLUXDB_ORG}
-      - INFLUXDB_BUCKET=${INFLUXDB_BUCKET}
-      - PYSPARK_PYTHON=python3
-      - PYSPARK_DRIVER_PYTHON=python3
+      - API_URL=${API_URL:-http://finnhub-client:8001/quote}
+      - INFLUXDB_URL=${INFLUXDB_URL:-http://influxdb:8086}
+      - INFLUXDB_TOKEN=${INFLUXDB_TOKEN:-local-token}
+      - INFLUXDB_ORG=${INFLUXDB_ORG:-trading}
+      - INFLUXDB_BUCKET=${INFLUXDB_BUCKET:-user_data}
+      - SPARK_MASTER_URL=local[*]
     ports:
       - "4000:4000"
       - "35000:35000"
@@ -92,7 +76,7 @@ services:
       - "8001:8001"
     environment:
       - FINNHUB_API_KEY=${FINNHUB_API_KEY}
-      - STOCK_SYMBOL=${STOCK_SYMBOL}
+      - STOCK_SYMBOL=${PRICE_SYMBOL:-AAPL}
     networks:
       - stock_api
     deploy:
@@ -104,17 +88,43 @@ services:
     image: influxdb:2.7
     environment:
       - DOCKER_INFLUXDB_INIT_MODE=setup
-      - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUXDB_USERNAME}
-      - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUXDB_PASSWORD}
-      - DOCKER_INFLUXDB_INIT_ORG=${INFLUXDB_ORG}
-      - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUXDB_BUCKET}
-      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUXDB_ADMIN_TOKEN}
+      - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUXDB_USERNAME:-admin}
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUXDB_PASSWORD:-password}
+      - DOCKER_INFLUXDB_INIT_ORG=${INFLUXDB_ORG:-trading}
+      - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUXDB_BUCKET:-market_data}
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUXDB_TOKEN:-local-token}
     ports:
       - "8086:8086"
     networks:
       - stock_api
     volumes:
       - influxdb_data:/var/lib/influxdb2
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+# For influx and grafana to work have to prune volumes after every stack rm
+# Have to connect influx to grafana manually
+# Having to rebuild grafana dashboard volumes get deleted
+  grafana:
+    image: grafana/grafana:10.4.1
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - INFLUXDB_ORG=${INFLUXDB_ORG}
+      - INFLUXDB_BUCKET=${INFLUXDB_BUCKET:-user_data}
+      - INFLUXDB_TOKEN=${INFLUXDB_TOKEN}
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+    ports:
+      - "3000:3000"
+    networks:
+      - stock_api
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
     deploy:
       replicas: 1
       restart_policy:
@@ -130,3 +140,4 @@ networks:
 
 volumes:
   influxdb_data:
+  grafana_data:

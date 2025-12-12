@@ -55,11 +55,10 @@ services:
     environment:
       - API_URL=${API_URL:-http://finnhub-client:8001/quote}
       - INFLUXDB_URL=${INFLUXDB_URL:-http://influxdb:8086}
-      - INFLUXDB_TOKEN=${INFLUXDB_ADMIN_TOKEN:-local-token}
+      - INFLUXDB_TOKEN=${INFLUXDB_TOKEN:-local-token}
       - INFLUXDB_ORG=${INFLUXDB_ORG:-trading}
       - INFLUXDB_BUCKET=${INFLUXDB_BUCKET:-market_data}
-      - PYSPARK_PYTHON=python3
-      - PYSPARK_DRIVER_PYTHON=python3
+      - SPARK_MASTER_URL=local[*]
     ports:
       - "4000:4000"
       - "35000:35000"
@@ -87,7 +86,7 @@ services:
     container_name: finnhub-client
     environment:
       - FINNHUB_API_KEY=${FINNHUB_API_KEY}
-      - STOCK_SYMBOL=${STOCK_SYMBOL:-NVDA}
+      - STOCK_SYMBOL=${PRICE_SYMBOL:-AAPL}
     ports:
       - "8001:8001"
     networks:
@@ -103,13 +102,34 @@ services:
       - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUXDB_PASSWORD:-password}
       - DOCKER_INFLUXDB_INIT_ORG=${INFLUXDB_ORG:-trading}
       - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUXDB_BUCKET:-market_data}
-      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUXDB_ADMIN_TOKEN:-local-token}
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUXDB_TOKEN:-local-token}
     volumes:
       - influxdb_data:/var/lib/influxdb2
     ports:
       - "8086:8086"
     networks:
       - stock_api
+    restart: unless-stopped
+    
+  grafana:
+    image: grafana/grafana:10.4.1
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - INFLUXDB_ORG=${INFLUXDB_ORG:-trading}
+      - INFLUXDB_BUCKET=${INFLUXDB_BUCKET:-user_data}
+      - INFLUXDB_TOKEN=${INFLUXDB_TOKEN:-local-token}
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+    ports:
+      - "3000:3000"
+    networks:
+      - stock_api
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:Z
     restart: unless-stopped
 
 networks:
@@ -118,3 +138,4 @@ networks:
 
 volumes:
   influxdb_data:
+  grafana_data:
