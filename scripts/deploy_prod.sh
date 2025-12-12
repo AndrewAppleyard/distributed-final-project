@@ -14,6 +14,11 @@ set -euo pipefail
 # Leave swarm (reset):  sudo docker swarm leave --force
 # If you leave the swarm you have to docker swarm init with your ip again
 
+# sudo docker volume rm distributed_grafana_data distributed_influxdb_data
+
+# sudo docker build -t distributed-frontend:latest ./frontend
+# sudo docker service update --force distributed_frontend
+
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
