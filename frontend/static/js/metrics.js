@@ -5,6 +5,7 @@ const backendBase = (configuredBackend && configuredBackend.replace(/\/+$/, ""))
 let equityHistory = [];
 let equityTimer = null;
 let refreshTimer = null;
+let loaderInterval = null;
 const STORAGE_KEY = "cardstock_equity_history";
 let cachedPositions = [];
 
@@ -69,6 +70,36 @@ function loadHistory() {
     } catch {
         equityHistory = [];
     }
+}
+
+function startLoader() {
+    const overlay = document.getElementById("metrics-loader");
+    const spans = Array.from(document.querySelectorAll("#metrics-loader-circle span"));
+    spans.forEach((s) => (s.style.opacity = "0"));
+    if (overlay) overlay.classList.remove("hidden");
+    let mode = "show";
+    let idx = 0;
+    if (loaderInterval) clearInterval(loaderInterval);
+    loaderInterval = setInterval(() => {
+        if (!spans.length) return;
+        spans[idx].style.opacity = mode === "show" ? "1" : "0";
+        idx += 1;
+        if (idx >= spans.length) {
+            idx = 0;
+            mode = mode === "show" ? "hide" : "show";
+        }
+    }, 250);
+}
+
+function stopLoader() {
+    if (loaderInterval) {
+        clearInterval(loaderInterval);
+        loaderInterval = null;
+    }
+    const overlay = document.getElementById("metrics-loader");
+    const spans = document.querySelectorAll("#metrics-loader-circle span");
+    spans.forEach((s) => (s.style.opacity = "0"));
+    if (overlay) overlay.classList.add("hidden");
 }
 
 function updateStats(equity, balance, positions) {
@@ -168,6 +199,7 @@ async function initializeMetrics() {
     if (sellConfirm) {
         sellConfirm.addEventListener("click", async () => {
             try {
+                startLoader();
                 const symbolList = cachedPositions.map((p) => p.symbol);
                 for (const sym of symbolList) {
                     await fetch(`${backendBase}/trades/${encodeURIComponent(sym)}`, {
@@ -181,6 +213,7 @@ async function initializeMetrics() {
                 console.error("Sell all failed", err);
             } finally {
                 closeSellModal();
+                stopLoader();
             }
         });
     }
